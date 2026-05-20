@@ -1,0 +1,86 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "blink_led_LP_MSPM0G3507_freertos_ticlang",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "blink_led_LP_MSPM0G3507_freertos_ticlang",
+                "resourceId": "/blink_led_LP_MSPM0G3507_freertos_ticlang/targetConfigs/MSPM0G3507.ccxml"
+            }
+        },
+        {
+            "name": "blink_led_LP_MSPM0G3507_freertos_ticlang (1)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "blink_led_LP_MSPM0G3507_freertos_ticlang",
+                "resourceId": "/blink_led_LP_MSPM0G3507_freertos_ticlang/targetConfigs/MSPM0G3507.ccxml"
+            }
+        },
+        {
+            "name": "blink_led_LP_MSPM0G3507_freertos_ticlang (2)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "blink_led_LP_MSPM0G3507_freertos_ticlang",
+                "resourceId": "/blink_led_LP_MSPM0G3507_freertos_ticlang/Driver/icm20608.c"
+            }
+        },
+        {
+            "name": "blink_led_LP_MSPM0G3507_freertos_ticlang (3)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "blink_led_LP_MSPM0G3507_freertos_ticlang",
+                "resourceId": "/blink_led_LP_MSPM0G3507_freertos_ticlang/Driver/icm20608.h"
+            }
+        },
+        {
+            "name": "blink_led_LP_MSPM0G3507_freertos_ticlang (4)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "blink_led_LP_MSPM0G3507_freertos_ticlang",
+                "resourceId": "/blink_led_LP_MSPM0G3507_freertos_ticlang/source/i2c.c"
+            }
+        },
+        {
+            "name": "blink_led_LP_MSPM0G3507_freertos_ticlang (5)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "blink_led_LP_MSPM0G3507_freertos_ticlang",
+                "resourceId": "/blink_led_LP_MSPM0G3507_freertos_ticlang/Driver/track.c"
+            }
+        },
+        {
+            "name": "blink_led_LP_MSPM0G3507_freertos_ticlang (6)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "blink_led_LP_MSPM0G3507_freertos_ticlang",
+                "resourceId": "/blink_led_LP_MSPM0G3507_freertos_ticlang/source/i2c.h"
+            }
+        },
+        {
+            "name": "blink_led_LP_MSPM0G3507_freertos_ticlang (7)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "blink_led_LP_MSPM0G3507_freertos_ticlang",
+                "resourceId": "/blink_led_LP_MSPM0G3507_freertos_ticlang/main.c"
+            }
+        },
+        {
+            "name": "blink_led_LP_MSPM0G3507_freertos_ticlang (8)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "blink_led_LP_MSPM0G3507_freertos_ticlang",
+                "resourceId": "/blink_led_LP_MSPM0G3507_freertos_ticlang/track.syscfg"
+            }
+        }
+    ]
+}
