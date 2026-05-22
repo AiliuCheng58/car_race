@@ -1,6 +1,7 @@
 #include "track.h"
 
 #include "ti_msp_dl_config.h"
+#include <sys/cdefs.h>
 
 volatile uint8_t track = 0;
 
@@ -9,6 +10,8 @@ volatile uint16_t adc1[4]={0};
 
 volatile bool ready_0=false;
 volatile bool ready_1=false;
+
+volatile int8_t gray_status = 0;
 
 void setTrackBit(uint8_t bit, uint16_t adc)
 {

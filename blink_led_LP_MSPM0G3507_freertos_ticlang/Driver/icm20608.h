@@ -4,11 +4,12 @@
 #include "head.h"
 
 /* I2C 地址 */
-#define ICM_ADDR     0x69
+#define ICM_ADDR     0x68
 
 /* 设备 ID */
 #define WHO_AM_I          0x75
-#define WHO_AM_I_VALUE    0xAF
+//#define WHO_AM_I_VALUE    0xAF
+#define WHO_AM_I_VALUE    0xAE
 
 /* 电源管理 */
 #define PWR_MGMT_1        0x6B

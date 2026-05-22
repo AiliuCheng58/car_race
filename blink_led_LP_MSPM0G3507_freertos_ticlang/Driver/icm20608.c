@@ -1,47 +1,52 @@
 #include "icm20608.h"
+#include "source/delay.h"
 #include "source/uart.h"
+#include "ti/driverlib/dl_gpio.h"
+#include "ti/driverlib/dl_uart.h"
+#include "ti_msp_dl_config.h"
 
 ICM_Data g_imu_raw;
 volatile uint8_t g_imu_ready = 0;
 
 uint8_t icm_init(void){
     uint8_t res;
-    uart_SendByte(1);
+    delay_MS(100);
     if(!i2c_ReadByte(ICM_ADDR, WHO_AM_I, &res))
-        return 0;
-    uart_SendByte(2);
+        return 123;
+    DL_UART_transmitDataBlocking(UART_0_INST, res);
+    DL_UART_transmitDataBlocking(UART_0_INST, 'F');
     if(res != WHO_AM_I_VALUE)
-        return 0;
-
+        return 231;
+    DL_UART_transmitDataBlocking(UART_0_INST, 'G');
     if(!i2c_SendByte(ICM_ADDR, PWR_MGMT_1, DEVICE_RESET))
-        return 0;
-
-    delay_ms(100);
+        return 2;
+    DL_UART_transmitDataBlocking(UART_0_INST, 'H');
+    delay_MS(100);
 
     if(!i2c_SendByte(ICM_ADDR, PWR_MGMT_1, AWAKE))
-        return 0;
-
+        return 3;
+    DL_UART_transmitDataBlocking(UART_0_INST, 'I');
     if(!i2c_SendByte(ICM_ADDR, PWR_MGMT_2, START))
-        return 0;
-
+        return 4;
+    DL_UART_transmitDataBlocking(UART_0_INST, 'J');
     if(!icm_set_lpf(50))
-        return 0;
-
+        return 5;
+    DL_UART_transmitDataBlocking(UART_0_INST, 'K');
     if(!icm_set_accel_lpf(50))
-        return 0;
-
+        return 6;
+    DL_UART_transmitDataBlocking(UART_0_INST, 'L');
     if(!icm_set_gyro_fsr(GYRO_FS_250DPS))
-        return 0;
-
+        return 7;
+    DL_UART_transmitDataBlocking(UART_0_INST, 'M');
     if(!icm_set_accel_fsr(ACCEL_FS_2G))
-        return 0;
-
+        return 8;
+    DL_UART_transmitDataBlocking(UART_0_INST, 'N');
     if(!icm_set_rate(100))
-        return 0;
+        return 9;
 
-    delay_ms(10);
+    delay_MS(10);
 
-    return 1;
+    return 10;
 }
 
 uint8_t icm_ReadRaw(ICM_Data *data){
