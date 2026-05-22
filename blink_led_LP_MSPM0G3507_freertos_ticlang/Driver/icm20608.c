@@ -7,52 +7,98 @@
 
 ICM_Data g_imu_raw;
 volatile uint8_t g_imu_ready = 0;
+volatile uint8_t g_imu_init_status = 0;
+volatile uint8_t g_imu_read_status = 0;
+volatile uint32_t g_imu_sample_count = 0;
+
+static void icm_delay_ms(uint32_t ms)
+{
+    if (xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED) {
+        delay_MS(ms);
+    } else {
+        delay_ms(ms);
+    }
+}
 
 uint8_t icm_init(void){
     uint8_t res;
-    delay_MS(100);
-    if(!i2c_ReadByte(ICM_ADDR, WHO_AM_I, &res))
+    uint8_t ok = 0;
+
+    icm_delay_ms(200);
+    for (uint8_t i = 0; i < 10U; i++) {
+        if(i2c_ReadByte(ICM_ADDR, WHO_AM_I, &res)){
+            ok = 1;
+            break;
+        }
+        g_imu_init_status = 123;
+        icm_delay_ms(20);
+    }
+    if(!ok){
         return 123;
+    }
     DL_UART_transmitDataBlocking(UART_0_INST, res);
     DL_UART_transmitDataBlocking(UART_0_INST, 'F');
-    if(res != WHO_AM_I_VALUE)
+    if(res != WHO_AM_I_VALUE){
+        g_imu_init_status = 231;
         return 231;
+    }
     DL_UART_transmitDataBlocking(UART_0_INST, 'G');
-    if(!i2c_SendByte(ICM_ADDR, PWR_MGMT_1, DEVICE_RESET))
+    if(!i2c_SendByte(ICM_ADDR, PWR_MGMT_1, DEVICE_RESET)){
+        g_imu_init_status = 2;
         return 2;
+    }
     DL_UART_transmitDataBlocking(UART_0_INST, 'H');
-    delay_MS(100);
+    icm_delay_ms(100);
 
-    if(!i2c_SendByte(ICM_ADDR, PWR_MGMT_1, AWAKE))
+    if(!i2c_SendByte(ICM_ADDR, PWR_MGMT_1, AWAKE)){
+        g_imu_init_status = 3;
         return 3;
+    }
     DL_UART_transmitDataBlocking(UART_0_INST, 'I');
-    if(!i2c_SendByte(ICM_ADDR, PWR_MGMT_2, START))
+    if(!i2c_SendByte(ICM_ADDR, PWR_MGMT_2, START)){
+        g_imu_init_status = 4;
         return 4;
+    }
     DL_UART_transmitDataBlocking(UART_0_INST, 'J');
-    if(!icm_set_lpf(50))
+    if(!icm_set_lpf(50)){
+        g_imu_init_status = 5;
         return 5;
+    }
     DL_UART_transmitDataBlocking(UART_0_INST, 'K');
-    if(!icm_set_accel_lpf(50))
+    if(!icm_set_accel_lpf(50)){
+        g_imu_init_status = 6;
         return 6;
+    }
     DL_UART_transmitDataBlocking(UART_0_INST, 'L');
-    if(!icm_set_gyro_fsr(GYRO_FS_250DPS))
+    if(!icm_set_gyro_fsr(GYRO_FS_250DPS)){
+        g_imu_init_status = 7;
         return 7;
+    }
     DL_UART_transmitDataBlocking(UART_0_INST, 'M');
-    if(!icm_set_accel_fsr(ACCEL_FS_2G))
+    if(!icm_set_accel_fsr(ACCEL_FS_2G)){
+        g_imu_init_status = 8;
         return 8;
+    }
     DL_UART_transmitDataBlocking(UART_0_INST, 'N');
-    if(!icm_set_rate(100))
+    if(!icm_set_rate(100)){
+        g_imu_init_status = 9;
         return 9;
+    }
 
-    delay_MS(10);
+    icm_delay_ms(10);
 
+    g_imu_init_status = 10;
     return 10;
 }
 
 uint8_t icm_ReadRaw(ICM_Data *data){
     uint8_t num[RAW_DATA_LEN];
-    if(!i2c_ReadBytes(ICM_ADDR, ACCEL_XOUT_H, num, RAW_DATA_LEN))
-        return 0;
+
+    for (uint8_t i = 0; i < RAW_DATA_LEN; i++) {
+        if (!i2c_ReadByte(ICM_ADDR, (uint8_t)(ACCEL_XOUT_H + i), &num[i])) {
+            return 0;
+        }
+    }
 
     data->ax = (int16_t)((uint16_t)num[0] << 8 | num[1]);
     data->ay = (int16_t)((uint16_t)num[2] << 8 | num[3]);
@@ -64,7 +110,7 @@ uint8_t icm_ReadRaw(ICM_Data *data){
     data->gy = (int16_t)((uint16_t)num[10] << 8 | num[11]);
     data->gz = (int16_t)((uint16_t)num[12] << 8 | num[13]);
     
-    return 1;
+    return 4;
 }
 
 uint8_t icm_set_rate(uint16_t rate){

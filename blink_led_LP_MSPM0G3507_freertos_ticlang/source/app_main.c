@@ -3,13 +3,18 @@
 
 void app_main(void)
 {
-    xTaskCreate(INIT, "INIT", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 3, NULL);
+    BaseType_t ret;
 
-    xTaskCreate(LED, "LED", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
+    //xTaskCreate(INIT, "INIT", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 3, NULL);
 
-    //xTaskCreate(ICM, "ICM", configMINIMAL_STACK_SIZE * 3, NULL, tskIDLE_PRIORITY + 2, NULL);
+    ret = xTaskCreate(LED, "LED", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
+    configASSERT(ret == pdPASS);
 
-    //xTaskCreate(UART,  "UART",  configMINIMAL_STACK_SIZE * 3,  NULL,  tskIDLE_PRIORITY + 1,  NULL);
+    ret = xTaskCreate(ICM, "ICM", configMINIMAL_STACK_SIZE * 8, NULL, tskIDLE_PRIORITY + 2, NULL);
+    configASSERT(ret == pdPASS);
+
+    ret = xTaskCreate(UART, "UART", configMINIMAL_STACK_SIZE * 5, NULL, tskIDLE_PRIORITY + 1, NULL);
+    configASSERT(ret == pdPASS);
 
     vTaskStartScheduler();
 

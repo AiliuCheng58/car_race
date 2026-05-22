@@ -29,7 +29,7 @@
 
 /* 初始化 */
 #define DEVICE_RESET      0x80
-#define AWAKE             0x01
+#define AWAKE             0x00
 #define START             0x00
 
 /* 量程：±250dps，±2g */
@@ -52,6 +52,9 @@ typedef struct
 
 extern ICM_Data g_imu_raw;
 extern volatile uint8_t g_imu_ready;
+extern volatile uint8_t g_imu_init_status;
+extern volatile uint8_t g_imu_read_status;
+extern volatile uint32_t g_imu_sample_count;
 uint8_t icm_init(void);
 uint8_t icm_ReadRaw(ICM_Data *data);
 uint8_t icm_set_rate(uint16_t rate);

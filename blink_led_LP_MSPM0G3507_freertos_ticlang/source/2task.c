@@ -62,7 +62,7 @@ void LED(void *pvParameters){
 void UART(void *pvParameters){
     (void) pvParameters;
 
-    static char uart_buf[256];
+    static char uart_buf[512];
 
     //static char uart_buf[128];
     while(1)
@@ -74,6 +74,15 @@ void UART(void *pvParameters){
 
         ICM_Data imu_local;
         uint8_t imu_ready_local;
+        uint8_t imu_init_status_local;
+        uint8_t imu_read_status_local;
+        uint32_t imu_sample_count_local;
+        uint8_t i2c_stage_local;
+        uint8_t i2c_addr_local;
+        uint8_t i2c_reg_local;
+        uint8_t i2c_len_local;
+        uint32_t i2c_status_local;
+        uint32_t i2c_rawint_local;
 
         taskENTER_CRITICAL();
         if (ready_0 && ready_1)
@@ -97,6 +106,15 @@ void UART(void *pvParameters){
 
         imu_local = g_imu_raw;
         imu_ready_local = g_imu_ready;
+        imu_init_status_local = g_imu_init_status;
+        imu_read_status_local = g_imu_read_status;
+        imu_sample_count_local = g_imu_sample_count;
+        i2c_stage_local = g_i2c_last_stage;
+        i2c_addr_local = g_i2c_last_addr;
+        i2c_reg_local = g_i2c_last_reg;
+        i2c_len_local = g_i2c_last_len;
+        i2c_status_local = g_i2c_last_status;
+        i2c_rawint_local = g_i2c_last_rawint;
         taskEXIT_CRITICAL();
 
         if (both_ready)
@@ -111,7 +129,7 @@ void UART(void *pvParameters){
                     "s7:%d\r\n"
                     "s8:%d\r\n"
                     "track:%d%d%d%d%d%d%d%d\r\n"
-                    "imu:%s\r\n"
+                    "imu:%s init:%u read:%u cnt:%lu i2c:%u a:%02X r:%02X l:%u st:%lu raw:%lu\r\n"
                     "ax:%d\r\n"
                     "ay:%d\r\n"
                     "az:%d\r\n"
@@ -136,6 +154,15 @@ void UART(void *pvParameters){
                     (track_local >> 1) & 1,
                     (track_local >> 0) & 1,
                     imu_ready_local ? "ok" : "err",
+                    imu_init_status_local,
+                    imu_read_status_local,
+                    (unsigned long)imu_sample_count_local,
+                    i2c_stage_local,
+                    i2c_addr_local,
+                    i2c_reg_local,
+                    i2c_len_local,
+                    (unsigned long)i2c_status_local,
+                    (unsigned long)i2c_rawint_local,
                     imu_local.ax,
                     imu_local.ay,
                     imu_local.az,
@@ -160,28 +187,40 @@ void ICM(void *pvParameters){
     (void) pvParameters;
     
     ICM_Data imu_temp;
+    uint8_t read_result;
 
     while(1)
     {
-        if(icm_ReadRaw(&imu_temp))
+        if (g_imu_init_status != 10U)
+        {
+            taskENTER_CRITICAL();
+            g_imu_ready = 0;
+            g_imu_read_status = 3;
+            taskEXIT_CRITICAL();
+
+            (void) icm_init();
+            delay_ms(200);
+            continue;
+        }
+
+        read_result = icm_ReadRaw(&imu_temp);
+        if(read_result)
         {
             taskENTER_CRITICAL();
             g_imu_raw = imu_temp;
             g_imu_ready = 1;
+            g_imu_read_status = read_result;
+            g_imu_sample_count++;
+            taskEXIT_CRITICAL();
+        }
+        else
+        {
+            taskENTER_CRITICAL();
+            g_imu_ready = 0;
+            g_imu_read_status = 2;
             taskEXIT_CRITICAL();
         }
 
         delay_ms(50);   // 20Hz采集
     }
-}
-
-void INIT(void *pvParameters){
-    (void)  pvParameters;
-
-    if(icm_init())
-        uart_SendString("icm ok\r\n");
-    else
-        uart_SendString("icm fail\r\n");
-
-    vTaskDelete(NULL);
 }
