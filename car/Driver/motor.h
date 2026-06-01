@@ -1,24 +1,12 @@
 #ifndef __MOTOR_H_
 #define __MOTOR_H_
 
-#include <stdint.h>
-#include "ti_msp_dl_config.h"
+#define MOTOR_PWM_MAX              (1000U) // PWM 比较值最大值，对应 100% 占空比
+#define MOTOR_LEFT_FORWARD_SIGN    (1.0f) // 左轮前进方向系数：正指令反着转就改成 -1
+#define MOTOR_RIGHT_FORWARD_SIGN   (1.0f) // 右轮前进方向系数：小车原地旋转时优先改这里
 
-/*
- * motor 模块只负责“输出到 TB6612”：
- * 1. STBY 使能
- * 2. AIN1/AIN2、BIN1/BIN2 控制方向
- * 3. PWMA/PWMB 控制占空比
- *
- * 编码器计数和速度换算放在 encode 模块，不放在这里。
- */
-
-/* 当前 PWM_0 周期按 1000 使用，所以占空比比较值限制在 0~1000。 */
-#define MOTOR_PWM_MAX              (1000U)
-
-void motor_init(void);
-void motor_left_set(float output, int8_t direction);
-void motor_right_set(float output, int8_t direction);
-void motor_stop(void);
+void motor_init(void); // 初始化 TB6612 使能脚、方向脚和 PWM 输出
+void motor_left_set(float output); // 设置左轮输出，正负号决定方向，绝对值决定 PWM
+void motor_right_set(float output); // 设置右轮输出，正负号决定方向，绝对值决定 PWM
 
 #endif

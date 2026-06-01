@@ -4,86 +4,46 @@
 
 void LED(void *pvParameters){
     (void) pvParameters;
-
     while (1) {
-
         // s5 -> bit7
-        if ((track >> 7) & 1)
-            DL_GPIO_clearPins(GPIO_LEDS_s5_PORT, GPIO_LEDS_s5_PIN);
-        else
-            DL_GPIO_setPins(GPIO_LEDS_s5_PORT, GPIO_LEDS_s5_PIN);
-
+        if ((track >> 7) & 1)   DL_GPIO_clearPins(GPIO_LEDS_s5_PORT, GPIO_LEDS_s5_PIN);
+        else                    DL_GPIO_setPins(GPIO_LEDS_s5_PORT, GPIO_LEDS_s5_PIN);
         // s6 -> bit6
-        if ((track >> 6) & 1)
-            DL_GPIO_clearPins(GPIO_LEDS_s6_PORT, GPIO_LEDS_s6_PIN);
-        else
-            DL_GPIO_setPins(GPIO_LEDS_s6_PORT, GPIO_LEDS_s6_PIN);
-
+        if ((track >> 6) & 1)   DL_GPIO_clearPins(GPIO_LEDS_s6_PORT, GPIO_LEDS_s6_PIN);
+        else                    DL_GPIO_setPins(GPIO_LEDS_s6_PORT, GPIO_LEDS_s6_PIN);
         // s7 -> bit5
-        if ((track >> 5) & 1)
-            DL_GPIO_clearPins(GPIO_LEDS_s7_PORT, GPIO_LEDS_s7_PIN);
-        else
-            DL_GPIO_setPins(GPIO_LEDS_s7_PORT, GPIO_LEDS_s7_PIN);
-
+        if ((track >> 5) & 1)   DL_GPIO_clearPins(GPIO_LEDS_s7_PORT, GPIO_LEDS_s7_PIN);
+        else                    DL_GPIO_setPins(GPIO_LEDS_s7_PORT, GPIO_LEDS_s7_PIN);
         // s8 -> bit4
-        if ((track >> 4) & 1)
-            DL_GPIO_clearPins(GPIO_LEDS_s8_PORT, GPIO_LEDS_s8_PIN);
-        else
-            DL_GPIO_setPins(GPIO_LEDS_s8_PORT, GPIO_LEDS_s8_PIN);
-
+        if ((track >> 4) & 1)   DL_GPIO_clearPins(GPIO_LEDS_s8_PORT, GPIO_LEDS_s8_PIN);
+        else                    DL_GPIO_setPins(GPIO_LEDS_s8_PORT, GPIO_LEDS_s8_PIN);
         // s4 -> bit3
-        if ((track >> 3) & 1)
-            DL_GPIO_clearPins(GPIO_LEDS_s4_PORT, GPIO_LEDS_s4_PIN);
-        else
-            DL_GPIO_setPins(GPIO_LEDS_s4_PORT, GPIO_LEDS_s4_PIN);
-
+        if ((track >> 3) & 1)   DL_GPIO_clearPins(GPIO_LEDS_s4_PORT, GPIO_LEDS_s4_PIN);
+        else                    DL_GPIO_setPins(GPIO_LEDS_s4_PORT, GPIO_LEDS_s4_PIN);
         // s3 -> bit2
-        if ((track >> 2) & 1)
-            DL_GPIO_clearPins(GPIO_LEDS_s3_PORT, GPIO_LEDS_s3_PIN);
-        else
-            DL_GPIO_setPins(GPIO_LEDS_s3_PORT, GPIO_LEDS_s3_PIN);
-
+        if ((track >> 2) & 1)   DL_GPIO_clearPins(GPIO_LEDS_s3_PORT, GPIO_LEDS_s3_PIN);
+        else                    DL_GPIO_setPins(GPIO_LEDS_s3_PORT, GPIO_LEDS_s3_PIN);
         // s2 -> bit1
-        if ((track >> 1) & 1)
-            DL_GPIO_clearPins(GPIO_LEDS_s2_PORT, GPIO_LEDS_s2_PIN);
-        else
-            DL_GPIO_setPins(GPIO_LEDS_s2_PORT, GPIO_LEDS_s2_PIN);
-
+        if ((track >> 1) & 1)   DL_GPIO_clearPins(GPIO_LEDS_s2_PORT, GPIO_LEDS_s2_PIN);
+        else                    DL_GPIO_setPins(GPIO_LEDS_s2_PORT, GPIO_LEDS_s2_PIN);
         // s1 -> bit0
-        if ((track >> 0) & 1)
-            DL_GPIO_clearPins(GPIO_LEDS_s1_PORT, GPIO_LEDS_s1_PIN);
-        else
-            DL_GPIO_setPins(GPIO_LEDS_s1_PORT, GPIO_LEDS_s1_PIN);
-
+        if ((track >> 0) & 1)   DL_GPIO_clearPins(GPIO_LEDS_s1_PORT, GPIO_LEDS_s1_PIN);
+        else                    DL_GPIO_setPins(GPIO_LEDS_s1_PORT, GPIO_LEDS_s1_PIN);
         delay_ms(10);
     }
 }
-
+/*
 void UART(void *pvParameters){
     (void) pvParameters;
 
-    static char uart_buf[512];
+    static char uart_buf[128];
 
-    //static char uart_buf[128];
     while(1)
     {
         uint16_t adc0_local[4];
         uint16_t adc1_local[4];
         uint8_t  track_local;
         bool     both_ready = false;
-
-        ICM_Data imu_local;
-        uint8_t imu_ready_local;
-        uint8_t imu_init_status_local;
-        uint8_t imu_read_status_local;
-        uint32_t imu_sample_count_local;
-        uint8_t i2c_stage_local;
-        uint8_t i2c_addr_local;
-        uint8_t i2c_reg_local;
-        uint8_t i2c_len_local;
-        uint32_t i2c_status_local;
-        uint32_t i2c_rawint_local;
-
         taskENTER_CRITICAL();
         if (ready_0 && ready_1)
         {
@@ -103,23 +63,9 @@ void UART(void *pvParameters){
 
             track_local = track;
         }
-
-        imu_local = g_imu_raw;
-        imu_ready_local = g_imu_ready;
-        imu_init_status_local = g_imu_init_status;
-        imu_read_status_local = g_imu_read_status;
-        imu_sample_count_local = g_imu_sample_count;
-        i2c_stage_local = g_i2c_last_stage;
-        i2c_addr_local = g_i2c_last_addr;
-        i2c_reg_local = g_i2c_last_reg;
-        i2c_len_local = g_i2c_last_len;
-        i2c_status_local = g_i2c_last_status;
-        i2c_rawint_local = g_i2c_last_rawint;
         taskEXIT_CRITICAL();
 
-        if (both_ready)
-        {
-            snprintf(uart_buf, sizeof(uart_buf),
+        snprintf(uart_buf, sizeof(uart_buf),
                     "s1:%d\r\n"
                     "s2:%d\r\n"
                     "s3:%d\r\n"
@@ -128,15 +74,7 @@ void UART(void *pvParameters){
                     "s6:%d\r\n"
                     "s7:%d\r\n"
                     "s8:%d\r\n"
-                    "track:%d%d%d%d%d%d%d%d\r\n"
-                    "imu:%s init:%u read:%u cnt:%lu i2c:%u a:%02X r:%02X l:%u st:%lu raw:%lu\r\n"
-                    "ax:%d\r\n"
-                    "ay:%d\r\n"
-                    "az:%d\r\n"
-                    "gx:%d\r\n"
-                    "gy:%d\r\n"
-                    "gz:%d\r\n"
-                    "temp:%d\r\n\r\n",
+                    "track:%d%d%d%d%d%d%d%d\r\n",
                     adc0_local[0],
                     adc0_local[1],
                     adc0_local[2],
@@ -152,32 +90,42 @@ void UART(void *pvParameters){
                     (track_local >> 3) & 1,
                     (track_local >> 2) & 1,
                     (track_local >> 1) & 1,
-                    (track_local >> 0) & 1,
-                    imu_ready_local ? "ok" : "err",
-                    imu_init_status_local,
-                    imu_read_status_local,
-                    (unsigned long)imu_sample_count_local,
-                    i2c_stage_local,
-                    i2c_addr_local,
-                    i2c_reg_local,
-                    i2c_len_local,
-                    (unsigned long)i2c_status_local,
-                    (unsigned long)i2c_rawint_local,
-                    imu_local.ax,
-                    imu_local.ay,
-                    imu_local.az,
-                    imu_local.gx,
-                    imu_local.gy,
-                    imu_local.gz,
-                    imu_local.temp);
+                    (track_local >> 0) & 1);
                     
             char *p = uart_buf;
             while (*p != '\0'){
                 DL_UART_transmitDataBlocking(UART_0_INST, *p);
                 p++;
             }
-        }
 
+        DL_GPIO_togglePins(GPIO_LEDS_RUN_LED_PORT, GPIO_LEDS_RUN_LED_PIN);
+        delay_ms(50);
+    }
+}
+*/
+void UART(void *pvParameters){
+    (void) pvParameters;
+
+    while(1)
+    {
+        uint8_t  track_local;
+        bool     both_ready = false;
+        taskENTER_CRITICAL();
+        if (ready_0 && ready_1)
+        {
+            both_ready = true;
+            ready_0 = false;
+            ready_1 = false;
+
+            track_local = track;
+        }
+        taskEXIT_CRITICAL();
+
+        if(both_ready){
+            DL_UART_transmitDataBlocking(UART_0_INST, 0xFE);
+            DL_UART_transmitDataBlocking(UART_0_INST, track_local);
+            DL_UART_transmitDataBlocking(UART_0_INST, 0xEF);
+        }
         DL_GPIO_togglePins(GPIO_LEDS_RUN_LED_PORT, GPIO_LEDS_RUN_LED_PIN);
         delay_ms(50);
     }

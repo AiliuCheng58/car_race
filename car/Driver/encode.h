@@ -1,8 +1,7 @@
 #ifndef __ENCODE_H_
-#define __ENCODE_H_
+#define __ENCODE_H_ // 防止 encode.h 被重复包含
 
 #include <stdint.h>
-#include "ti_msp_dl_config.h"
 
 /*
  * encode 模块只负责“读取编码器”：
@@ -13,46 +12,32 @@
 
 /*
  * 编码器引脚由 car.syscfg 配置：
- * 左轮 A/B 相：PA6 / PA7
+ * 左轮 A/B 相：PA8 / PA7
  * 右轮 A/B 相：PB9 / PB10
  */
-#define ENCODER_LEFT_A_PORT      ENCODER_LEFT_PORT
-#define ENCODER_LEFT_B_PORT      ENCODER_LEFT_PORT
-#define ENCODER_RIGHT_A_PORT     ENCODER_RIGHT_PORT
-#define ENCODER_RIGHT_B_PORT     ENCODER_RIGHT_PORT
-
-#define ENCODER_LEFT_A_PIN       ENCODER_LEFT_LEFT_A_PIN
-#define ENCODER_LEFT_B_PIN       ENCODER_LEFT_LEFT_B_PIN
-#define ENCODER_RIGHT_A_PIN      ENCODER_RIGHT_RIGHT_A_PIN
-#define ENCODER_RIGHT_B_PIN      ENCODER_RIGHT_RIGHT_B_PIN
-
-#define ENCODER_LEFT_PIN_MASK    (ENCODER_LEFT_A_PIN | ENCODER_LEFT_B_PIN)
-#define ENCODER_RIGHT_PIN_MASK   (ENCODER_RIGHT_A_PIN | ENCODER_RIGHT_B_PIN)
 
 /* 正转计数为负时，把对应方向系数改成 -1。 */
-#define ENCODER_LEFT_DIR         (1)
-#define ENCODER_RIGHT_DIR        (1)
+#define ENCODER_LEFT_DIR         (-1) // 左轮计数方向系数：实测前进时为负，所以取反
+#define ENCODER_RIGHT_DIR        (1) // 右轮计数方向系数：车轮向前转时计数为负就改成 -1
 
 /*
  * 一圈对应的编码器计数。
  * 注意这里要按实际电机校准：霍尔线数、减速比、是否四倍频都会影响这个值。
  */
-#define ENCODER_COUNTS_PER_REV   (500.0f)
-
+#define ENCODER_LEFT_COUNTS_PER_REV   (1458.6f) // 左轮实测每转一圈的编码器计数
+#define ENCODER_RIGHT_COUNTS_PER_REV  (1457.8f) // 右轮实测每转一圈的编码器计数
 /* PID 定时器当前是 10 ms 取一次编码器增量。 */
-#define ENCODER_SAMPLE_PERIOD_S  (0.01f)
+#define ENCODER_SAMPLE_PERIOD_S  (0.01f) // 编码器采样周期，单位秒，要和 TIMER_0 周期一致
 
 typedef struct {
     /* 一个采样周期内累计到的左右轮编码器增量。 */
-    int32_t left;
-    int32_t right;
+    int32_t left; // 左轮本周期新增计数
+    int32_t right; // 右轮本周期新增计数
 } EncoderSample;
 
-void encoder_init(void);
-void encoder_clear(void);
-int32_t encoder_get_left_count(void);
-int32_t encoder_get_right_count(void);
-EncoderSample encoder_get_and_clear(void);
-float encoder_count_to_rpm(int32_t count);
+void encoder_init(void); // 初始化编码器状态并打开 GPIO 中断
+EncoderSample encoder_get_and_clear(void); // 读取本周期增量后清零，给 PID 定时器用
+float encoder_left_count_to_rpm(int32_t count); // 左轮计数换算 RPM，使用左轮实测每圈计数
+float encoder_right_count_to_rpm(int32_t count); // 右轮计数换算 RPM，使用右轮实测每圈计数
 
 #endif

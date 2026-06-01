@@ -47,6 +47,7 @@ typedef struct
     int16_t gz;
 
     int16_t temp;
+    float Temp;
 
 }ICM_Data;
 
