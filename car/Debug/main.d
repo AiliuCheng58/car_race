@@ -1,16 +1,6 @@
 # FIXED
 
 main.o: ../main.c \
- D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/kernel/freertos/Source/include/FreeRTOS.h \
- D:/AiliuCheng/work/DIAN_RACE/car/freertos_builds_LP_MSPM0G3507_release_ticlang/FreeRTOSConfig.h \
- D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/source/ti/posix/freertos/PTLS.h \
- D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/kernel/freertos/Source/include/projdefs.h \
- D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/kernel/freertos/Source/include/portable.h \
- D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/kernel/freertos/Source/include/deprecated_definitions.h \
- D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/kernel/freertos/Source/portable/TI_ARM_CLANG/ARM_CM0/portmacro.h \
- D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/kernel/freertos/Source/include/mpu_wrappers.h \
- D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/kernel/freertos/Source/include/task.h \
- D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/kernel/freertos/Source/include/list.h \
  ti_msp_dl_config.h \
  D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/source/ti/devices/msp/msp.h \
  D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/source/ti/devices/DeviceFamily.h \
@@ -93,17 +83,11 @@ main.o: ../main.c \
  D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_vref.h \
  D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_wwdt.h \
  D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_interrupt.h \
- D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_systick.h
-D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/kernel/freertos/Source/include/FreeRTOS.h:
-D:/AiliuCheng/work/DIAN_RACE/car/freertos_builds_LP_MSPM0G3507_release_ticlang/FreeRTOSConfig.h:
-D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/source/ti/posix/freertos/PTLS.h:
-D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/kernel/freertos/Source/include/projdefs.h:
-D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/kernel/freertos/Source/include/portable.h:
-D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/kernel/freertos/Source/include/deprecated_definitions.h:
-D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/kernel/freertos/Source/portable/TI_ARM_CLANG/ARM_CM0/portmacro.h:
-D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/kernel/freertos/Source/include/mpu_wrappers.h:
-D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/kernel/freertos/Source/include/task.h:
-D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/kernel/freertos/Source/include/list.h:
+ D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_systick.h \
+ ../app_main.h D:/AiliuCheng/work/DIAN_RACE/aa/car/Driver/control.h \
+ D:/AiliuCheng/work/DIAN_RACE/aa/car/Driver/encode.h \
+ D:/AiliuCheng/work/DIAN_RACE/aa/car/Driver/motor.h \
+ D:/AiliuCheng/work/DIAN_RACE/aa/car/Driver/uart.h
 ti_msp_dl_config.h:
 D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/source/ti/devices/msp/msp.h:
 D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/source/ti/devices/DeviceFamily.h:
@@ -187,3 +171,8 @@ D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_v
 D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_wwdt.h:
 D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_interrupt.h:
 D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_systick.h:
+../app_main.h:
+D:/AiliuCheng/work/DIAN_RACE/aa/car/Driver/control.h:
+D:/AiliuCheng/work/DIAN_RACE/aa/car/Driver/encode.h:
+D:/AiliuCheng/work/DIAN_RACE/aa/car/Driver/motor.h:
+D:/AiliuCheng/work/DIAN_RACE/aa/car/Driver/uart.h:

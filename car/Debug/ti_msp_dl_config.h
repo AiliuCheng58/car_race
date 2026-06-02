@@ -82,7 +82,7 @@ extern "C" {
 #define PWM_0_INST                                                         TIMA0
 #define PWM_0_INST_IRQHandler                                   TIMA0_IRQHandler
 #define PWM_0_INST_INT_IRQN                                     (TIMA0_INT_IRQn)
-#define PWM_0_INST_CLK_FREQ                                             16000000
+#define PWM_0_INST_CLK_FREQ                                              8000000
 /* GPIO defines for channel 0 */
 #define GPIO_PWM_0_C0_PORT                                                 GPIOB
 #define GPIO_PWM_0_C0_PIN                                         DL_GPIO_PIN_14
@@ -107,19 +107,19 @@ extern "C" {
 
 
 
-/* Defines for I2C_0 */
-#define I2C_0_INST                                                          I2C0
-#define I2C_0_INST_IRQHandler                                    I2C0_IRQHandler
-#define I2C_0_INST_INT_IRQN                                        I2C0_INT_IRQn
-#define I2C_0_BUS_SPEED_HZ                                                400000
-#define GPIO_I2C_0_SDA_PORT                                                GPIOA
-#define GPIO_I2C_0_SDA_PIN                                        DL_GPIO_PIN_28
-#define GPIO_I2C_0_IOMUX_SDA                                      (IOMUX_PINCM3)
-#define GPIO_I2C_0_IOMUX_SDA_FUNC                       IOMUX_PINCM3_PF_I2C0_SDA
-#define GPIO_I2C_0_SCL_PORT                                                GPIOA
-#define GPIO_I2C_0_SCL_PIN                                        DL_GPIO_PIN_31
-#define GPIO_I2C_0_IOMUX_SCL                                      (IOMUX_PINCM6)
-#define GPIO_I2C_0_IOMUX_SCL_FUNC                       IOMUX_PINCM6_PF_I2C0_SCL
+/* Defines for I2C_1 */
+#define I2C_1_INST                                                          I2C1
+#define I2C_1_INST_IRQHandler                                    I2C1_IRQHandler
+#define I2C_1_INST_INT_IRQN                                        I2C1_INT_IRQn
+#define I2C_1_BUS_SPEED_HZ                                                100000
+#define GPIO_I2C_1_SDA_PORT                                                GPIOA
+#define GPIO_I2C_1_SDA_PIN                                         DL_GPIO_PIN_3
+#define GPIO_I2C_1_IOMUX_SDA                                      (IOMUX_PINCM8)
+#define GPIO_I2C_1_IOMUX_SDA_FUNC                       IOMUX_PINCM8_PF_I2C1_SDA
+#define GPIO_I2C_1_SCL_PORT                                                GPIOA
+#define GPIO_I2C_1_SCL_PIN                                         DL_GPIO_PIN_4
+#define GPIO_I2C_1_IOMUX_SCL                                      (IOMUX_PINCM9)
+#define GPIO_I2C_1_IOMUX_SCL_FUNC                       IOMUX_PINCM9_PF_I2C1_SCL
 
 
 /* Defines for UART_0 */
@@ -143,6 +143,24 @@ extern "C" {
 
 
 
+/* Port definition for Pin Group MOTOR_ENABLE */
+#define MOTOR_ENABLE_PORT                                                (GPIOA)
+
+/* Defines for STBY: GPIOA.23 with pinCMx 53 on package pin 24 */
+#define MOTOR_ENABLE_STBY_PIN                                   (DL_GPIO_PIN_23)
+#define MOTOR_ENABLE_STBY_IOMUX                                  (IOMUX_PINCM53)
+/* Port definition for Pin Group LED */
+#define LED_PORT                                                         (GPIOB)
+
+/* Defines for PIN_0: GPIOB.22 with pinCMx 50 on package pin 21 */
+#define LED_PIN_0_PIN                                           (DL_GPIO_PIN_22)
+#define LED_PIN_0_IOMUX                                          (IOMUX_PINCM50)
+/* Port definition for Pin Group H2024_SIGNAL */
+#define H2024_SIGNAL_PORT                                                (GPIOB)
+
+/* Defines for BUZZER: GPIOB.23 with pinCMx 51 on package pin 22 */
+#define H2024_SIGNAL_BUZZER_PIN                                 (DL_GPIO_PIN_23)
+#define H2024_SIGNAL_BUZZER_IOMUX                                (IOMUX_PINCM51)
 /* Port definition for Pin Group MOTOR_LEFT */
 #define MOTOR_LEFT_PORT                                                  (GPIOA)
 
@@ -161,6 +179,43 @@ extern "C" {
 /* Defines for RIGHT_IN2: GPIOB.26 with pinCMx 57 on package pin 28 */
 #define MOTOR_RIGHT_RIGHT_IN2_PIN                               (DL_GPIO_PIN_26)
 #define MOTOR_RIGHT_RIGHT_IN2_IOMUX                              (IOMUX_PINCM57)
+/* Port definition for Pin Group ENCODER_LEFT */
+#define ENCODER_LEFT_PORT                                                (GPIOA)
+
+/* Defines for LEFT_A: GPIOA.8 with pinCMx 19 on package pin 54 */
+// pins affected by this interrupt request:["LEFT_A","LEFT_B"]
+#define ENCODER_LEFT_INT_IRQN                                   (GPIOA_INT_IRQn)
+#define ENCODER_LEFT_INT_IIDX                   (DL_INTERRUPT_GROUP1_IIDX_GPIOA)
+#define ENCODER_LEFT_LEFT_A_IIDX                             (DL_GPIO_IIDX_DIO8)
+#define ENCODER_LEFT_LEFT_A_PIN                                  (DL_GPIO_PIN_8)
+#define ENCODER_LEFT_LEFT_A_IOMUX                                (IOMUX_PINCM19)
+/* Defines for LEFT_B: GPIOA.7 with pinCMx 14 on package pin 49 */
+#define ENCODER_LEFT_LEFT_B_IIDX                             (DL_GPIO_IIDX_DIO7)
+#define ENCODER_LEFT_LEFT_B_PIN                                  (DL_GPIO_PIN_7)
+#define ENCODER_LEFT_LEFT_B_IOMUX                                (IOMUX_PINCM14)
+/* Port definition for Pin Group ENCODER_RIGHT */
+#define ENCODER_RIGHT_PORT                                               (GPIOB)
+
+/* Defines for RIGHT_A: GPIOB.9 with pinCMx 26 on package pin 61 */
+// pins affected by this interrupt request:["RIGHT_A","RIGHT_B"]
+#define ENCODER_RIGHT_INT_IRQN                                  (GPIOB_INT_IRQn)
+#define ENCODER_RIGHT_INT_IIDX                  (DL_INTERRUPT_GROUP1_IIDX_GPIOB)
+#define ENCODER_RIGHT_RIGHT_A_IIDX                           (DL_GPIO_IIDX_DIO9)
+#define ENCODER_RIGHT_RIGHT_A_PIN                                (DL_GPIO_PIN_9)
+#define ENCODER_RIGHT_RIGHT_A_IOMUX                              (IOMUX_PINCM26)
+/* Defines for RIGHT_B: GPIOB.10 with pinCMx 27 on package pin 62 */
+#define ENCODER_RIGHT_RIGHT_B_IIDX                          (DL_GPIO_IIDX_DIO10)
+#define ENCODER_RIGHT_RIGHT_B_PIN                               (DL_GPIO_PIN_10)
+#define ENCODER_RIGHT_RIGHT_B_IOMUX                              (IOMUX_PINCM27)
+/* Port definition for Pin Group H2024_BUTTONS */
+#define H2024_BUTTONS_PORT                                               (GPIOB)
+
+/* Defines for MODE: GPIOB.0 with pinCMx 12 on package pin 47 */
+#define H2024_BUTTONS_MODE_PIN                                   (DL_GPIO_PIN_0)
+#define H2024_BUTTONS_MODE_IOMUX                                 (IOMUX_PINCM12)
+/* Defines for START: GPIOB.1 with pinCMx 13 on package pin 48 */
+#define H2024_BUTTONS_START_PIN                                  (DL_GPIO_PIN_1)
+#define H2024_BUTTONS_START_IOMUX                                (IOMUX_PINCM13)
 
 
 /* clang-format on */
@@ -171,7 +226,7 @@ void SYSCFG_DL_GPIO_init(void);
 void SYSCFG_DL_SYSCTL_init(void);
 void SYSCFG_DL_PWM_0_init(void);
 void SYSCFG_DL_TIMER_0_init(void);
-void SYSCFG_DL_I2C_0_init(void);
+void SYSCFG_DL_I2C_1_init(void);
 void SYSCFG_DL_UART_0_init(void);
 
 

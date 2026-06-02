@@ -81,6 +81,213 @@
                 "name": "blink_led_LP_MSPM0G3507_freertos_ticlang",
                 "resourceId": "/blink_led_LP_MSPM0G3507_freertos_ticlang/track.syscfg"
             }
+        },
+        {
+            "name": "blink_led_LP_MSPM0G3507_freertos_ticlang (9)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "blink_led_LP_MSPM0G3507_freertos_ticlang",
+                "resourceId": "/blink_led_LP_MSPM0G3507_freertos_ticlang/source/2task.c"
+            }
+        },
+        {
+            "name": "blink_led_LP_MSPM0G3507_freertos_ticlang (10)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "blink_led_LP_MSPM0G3507_freertos_ticlang",
+                "resourceId": "/blink_led_LP_MSPM0G3507_freertos_ticlang/source/app_main.c"
+            }
+        },
+        {
+            "name": "car",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "car",
+                "resourceId": "/car"
+            }
+        },
+        {
+            "name": "car (1)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "car",
+                "resourceId": "/car/Driver/encode.c"
+            }
+        },
+        {
+            "name": "car (2)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "car",
+                "resourceId": "/car/Driver/encode.h"
+            }
+        },
+        {
+            "name": "car (3)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "car",
+                "resourceId": "/car/targetConfigs/MSPM0G3507.ccxml"
+            }
+        },
+        {
+            "name": "car (4)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "car",
+                "resourceId": "/car/main.c"
+            }
+        },
+        {
+            "name": "car (5)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "car",
+                "resourceId": "/car/Driver/motor.c"
+            }
+        },
+        {
+            "name": "car (6)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "car",
+                "resourceId": "/car/Debug/ti_msp_dl_config.h"
+            }
+        },
+        {
+            "name": "car (7)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "car",
+                "resourceId": "/car/Driver/pid.h"
+            }
+        },
+        {
+            "name": "car (8)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "car",
+                "resourceId": "/car/Driver/control.c"
+            }
+        },
+        {
+            "name": "blink_led_LP_MSPM0G3507_freertos_ticlang (11)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "blink_led_LP_MSPM0G3507_freertos_ticlang",
+                "resourceId": "/blink_led_LP_MSPM0G3507_freertos_ticlang"
+            }
+        },
+        {
+            "name": "car (9)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "car",
+                "resourceId": "/car/Driver/uart.c"
+            }
+        },
+        {
+            "name": "blink_led_LP_MSPM0G3507_freertos_ticlang (12)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "blink_led_LP_MSPM0G3507_freertos_ticlang",
+                "resourceId": "/blink_led_LP_MSPM0G3507_freertos_ticlang/source/uart.c"
+            }
+        },
+        {
+            "name": "blink_led_LP_MSPM0G3507_freertos_ticlang (13)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "blink_led_LP_MSPM0G3507_freertos_ticlang",
+                "resourceId": "/blink_led_LP_MSPM0G3507_freertos_ticlang/Driver/track.h"
+            }
+        },
+        {
+            "name": "car (10)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "car",
+                "resourceId": "/car/Debug/main.d"
+            }
+        },
+        {
+            "name": "car (11)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "car",
+                "resourceId": "/car/Driver/track.c"
+            }
+        },
+        {
+            "name": "car (12)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "car",
+                "resourceId": "/car/Driver/delay.h"
+            }
+        },
+        {
+            "name": "car (13)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "car",
+                "resourceId": "/car/Driver/track.h"
+            }
+        },
+        {
+            "name": "car (14)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "car",
+                "resourceId": "/car/Driver/pid.c"
+            }
+        },
+        {
+            "name": "car (15)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "car",
+                "resourceId": "/car/Driver/uart.h"
+            }
+        },
+        {
+            "name": "car (16)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "car",
+                "resourceId": "/car/Driver/motor.h"
+            }
+        },
+        {
+            "name": "car (17)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "car",
+                "resourceId": "/car/app_main.c"
+            }
         }
     ]
 }

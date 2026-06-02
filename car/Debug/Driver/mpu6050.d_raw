@@ -1,0 +1,5 @@
+Driver/mpu6050.o: ..\Driver\mpu6050.c ..\Driver\mpu6050.h \
+  ..\Driver\delay.h ..\Driver\i2c.h
+..\Driver\mpu6050.h:
+..\Driver\delay.h:
+..\Driver\i2c.h:

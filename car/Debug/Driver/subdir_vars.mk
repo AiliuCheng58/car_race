@@ -6,45 +6,57 @@ SHELL = cmd.exe
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../Driver/I2C.c \
+../Driver/control.c \
+../Driver/delay.c \
+../Driver/encode.c \
 ../Driver/motor.c \
 ../Driver/pid.c \
-../Driver/sys.c \
+../Driver/track.c \
 ../Driver/uart.c 
 
 C_DEPS += \
-./Driver/I2C.d \
+./Driver/control.d \
+./Driver/delay.d \
+./Driver/encode.d \
 ./Driver/motor.d \
 ./Driver/pid.d \
-./Driver/sys.d \
+./Driver/track.d \
 ./Driver/uart.d 
 
 OBJS += \
-./Driver/I2C.o \
+./Driver/control.o \
+./Driver/delay.o \
+./Driver/encode.o \
 ./Driver/motor.o \
 ./Driver/pid.o \
-./Driver/sys.o \
+./Driver/track.o \
 ./Driver/uart.o 
 
 OBJS__QUOTED += \
-"Driver\I2C.o" \
+"Driver\control.o" \
+"Driver\delay.o" \
+"Driver\encode.o" \
 "Driver\motor.o" \
 "Driver\pid.o" \
-"Driver\sys.o" \
+"Driver\track.o" \
 "Driver\uart.o" 
 
 C_DEPS__QUOTED += \
-"Driver\I2C.d" \
+"Driver\control.d" \
+"Driver\delay.d" \
+"Driver\encode.d" \
 "Driver\motor.d" \
 "Driver\pid.d" \
-"Driver\sys.d" \
+"Driver\track.d" \
 "Driver\uart.d" 
 
 C_SRCS__QUOTED += \
-"../Driver/I2C.c" \
+"../Driver/control.c" \
+"../Driver/delay.c" \
+"../Driver/encode.c" \
 "../Driver/motor.c" \
 "../Driver/pid.c" \
-"../Driver/sys.c" \
+"../Driver/track.c" \
 "../Driver/uart.c" 
 
 

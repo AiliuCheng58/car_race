@@ -14,7 +14,7 @@ int main(void)
 
     motor_init();                                   // 初始化 TB6612 方向脚、STBY 使能脚和 PWM 输出值
     encoder_init();                                 // 初始化编码器 AB 相初始状态，并打开 GPIO 中断
-    UART_init();                                    // 打开 UART 接收中断，后面用于循迹数据和 PID 串口调参
+    UART_init();                                    // 打开 UART 接收中断，用于接收副板发送的八路灰度 raw
 
     control_init();                                 // 初始化左右轮速度环，默认目标速度为 0
 

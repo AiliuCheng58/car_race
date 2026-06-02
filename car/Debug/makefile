@@ -10,13 +10,15 @@ GEN_OPTS__FLAG :=
 GEN_CMDS__FLAG := 
 
 ORDERED_OBJS += \
+"./app_main.o" \
 "./ti_msp_dl_config.o" \
-"./main-blinky.o" \
 "./main.o" \
-"./Driver/I2C.o" \
+"./Driver/control.o" \
+"./Driver/delay.o" \
+"./Driver/encode.o" \
 "./Driver/motor.o" \
 "./Driver/pid.o" \
-"./Driver/sys.o" \
+"./Driver/track.o" \
 "./Driver/uart.o" \
 "./freertos/ticlang/startup_mspm0g350x_ticlang.o" \
 "../mspm0g3507.cmd" \
@@ -145,27 +147,27 @@ all: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 	@$(MAKE) --no-print-directory -Onone "car.out"
 
 dependents:
-	-cd D:/AiliuCheng/work/DIAN_RACE/car/freertos_builds_LP_MSPM0G3507_release_ticlang/Debug && $(MAKE) clean all
+	-cd D:/AiliuCheng/work/DIAN_RACE/aa/freertos_builds_LP_MSPM0G3507_release_ticlang/Debug && $(MAKE) all
 
 # Tool invocations
-car.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS) D:/AiliuCheng/work/DIAN_RACE/car/freertos_builds_LP_MSPM0G3507_release_ticlang/Debug/freertos_builds_LP_MSPM0G3507_release_ticlang.lib
+car.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS) D:/AiliuCheng/work/DIAN_RACE/aa/freertos_builds_LP_MSPM0G3507_release_ticlang/Debug/freertos_builds_LP_MSPM0G3507_release_ticlang.lib
 	@echo 'Building target: "$@"'
 	@echo 'Invoking: Arm Linker'
-	"E:/MyGame/Tools/CCS/ccs/tools/compiler/ti-cgt-armllvm_4.0.0.LTS/bin/tiarmclang.exe" -march=thumbv6m -mcpu=cortex-m0plus -mfloat-abi=soft -mlittle-endian -mthumb -O2 -D__MSPM0G3507__ -gdwarf-3 -Wall -Wl,-m"car.map" -Wl,-i"D:/AiliuCheng/work/DIAN_RACE/car/freertos_builds_LP_MSPM0G3507_release_ticlang/Debug" -Wl,-i"D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/source" -Wl,-i"D:/AiliuCheng/work/DIAN_RACE/car/car" -Wl,-i"D:/AiliuCheng/work/DIAN_RACE/car/car/Debug/syscfg" -Wl,-i"E:/MyGame/Tools/CCS/ccs/tools/compiler/ti-cgt-armllvm_4.0.0.LTS/lib" -Wl,--diag_wrap=off -Wl,--display_error_number -Wl,--warn_sections -Wl,--xml_link_info="car_linkInfo.xml" -Wl,--rom_model -o "car.out" $(ORDERED_OBJS)
+	"E:/MyGame/Tools/CCS/ccs/tools/compiler/ti-cgt-armllvm_4.0.0.LTS/bin/tiarmclang.exe" -march=thumbv6m -mcpu=cortex-m0plus -mfloat-abi=soft -mlittle-endian -mthumb -O2 -D__MSPM0G3507__ -gdwarf-3 -Wall -Wl,-m"car.map" -Wl,-i"D:/AiliuCheng/work/DIAN_RACE/aa/freertos_builds_LP_MSPM0G3507_release_ticlang/Debug" -Wl,-i"D:/AiliuCheng/work/DIAN_RACE/TiSDK/mspm0_sdk_2_10_00_04/source" -Wl,-i"D:/AiliuCheng/work/DIAN_RACE/aa/car" -Wl,-i"D:/AiliuCheng/work/DIAN_RACE/aa/car/Debug/syscfg" -Wl,-i"E:/MyGame/Tools/CCS/ccs/tools/compiler/ti-cgt-armllvm_4.0.0.LTS/lib" -Wl,--diag_wrap=off -Wl,--display_error_number -Wl,--warn_sections -Wl,--xml_link_info="car_linkInfo.xml" -Wl,--rom_model -o "car.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 
 # Other Targets
 clean:
 	-$(RM) $(GEN_MISC_FILES__QUOTED)$(GEN_FILES__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "ti_msp_dl_config.o" "main-blinky.o" "main.o" "Driver\I2C.o" "Driver\motor.o" "Driver\pid.o" "Driver\sys.o" "Driver\uart.o" "freertos\ticlang\startup_mspm0g350x_ticlang.o" 
-	-$(RM) "ti_msp_dl_config.d" "main-blinky.d" "main.d" "Driver\I2C.d" "Driver\motor.d" "Driver\pid.d" "Driver\sys.d" "Driver\uart.d" "freertos\ticlang\startup_mspm0g350x_ticlang.d" 
+	-$(RM) "app_main.o" "ti_msp_dl_config.o" "main.o" "Driver\control.o" "Driver\delay.o" "Driver\encode.o" "Driver\motor.o" "Driver\pid.o" "Driver\track.o" "Driver\uart.o" "freertos\ticlang\startup_mspm0g350x_ticlang.o" 
+	-$(RM) "app_main.d" "ti_msp_dl_config.d" "main.d" "Driver\control.d" "Driver\delay.d" "Driver\encode.d" "Driver\motor.d" "Driver\pid.d" "Driver\track.d" "Driver\uart.d" "freertos\ticlang\startup_mspm0g350x_ticlang.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 
 .PHONY: all clean dependents
 .SECONDARY:
-D:/AiliuCheng/work/DIAN_RACE/car/freertos_builds_LP_MSPM0G3507_release_ticlang/Debug/freertos_builds_LP_MSPM0G3507_release_ticlang.lib:
+D:/AiliuCheng/work/DIAN_RACE/aa/freertos_builds_LP_MSPM0G3507_release_ticlang/Debug/freertos_builds_LP_MSPM0G3507_release_ticlang.lib:
 
 -include ../makefile.targets
 
