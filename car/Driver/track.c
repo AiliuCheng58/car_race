@@ -55,7 +55,7 @@ uint8_t Track_receive(void)                                                     
                 break;                                                          // 本次只处理最新找到的一帧
             }
         }
-        if (!flag) {
+        if (!flag) {                                                            // 当前收到半包，丢弃开头无效数据并非阻塞等待剩下半包
             if (UART_Data[RX_index - 2U] == 0xFEU) {
                 UART_Data[0] = UART_Data[RX_index - 2U];                        // 保留末尾可能尚未收完整的帧头
                 UART_Data[1] = UART_Data[RX_index - 1U];                        // 保留帧头后的 raw，等待下一次收到帧尾
