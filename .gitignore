@@ -1,6 +1,7 @@
 Debug/
 .opencode/
 .setting/
+.settings/
 setting/
 freertos_builds_LP_MSPM0G3507_release_ticlang/
 .theia/
