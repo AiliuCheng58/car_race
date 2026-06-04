@@ -1,7 +1,11 @@
 #include "encode.h"
 
+#include "FreeRTOS.h"
+#include "semphr.h"
 #include "ti_msp_dl_config.h"
 #include "ti/driverlib/dl_gpio.h"
+
+extern SemaphoreHandle_t button_sem;
 
 static volatile int32_t encoder_left_count = 0; // 左轮累计编码器计数，中断和 PID 定时器都会访问
 static volatile int32_t encoder_right_count = 0; // 右轮累计编码器计数，中断和 PID 定时器都会访问
@@ -55,9 +59,50 @@ void encoder_init(void)
         ENCODER_RIGHT_RIGHT_A_PIN | ENCODER_RIGHT_RIGHT_B_PIN); // 清右轮 AB 相残留中断标志
 
     NVIC_ClearPendingIRQ(ENCODER_LEFT_INT_IRQN); // 清左轮所在 GPIO 组的 NVIC 挂起位
-    NVIC_ClearPendingIRQ(ENCODER_RIGHT_INT_IRQN); // 清右轮所在 GPIO 组的 NVIC 挂起位
+    NVIC_ClearPendingIRQ(GPIO_MULTIPLE_GPIOB_INT_IRQN); // 清 GPIOB 组的 NVIC 挂起位
     NVIC_EnableIRQ(ENCODER_LEFT_INT_IRQN); // 打开左轮编码器 GPIO 中断
-    NVIC_EnableIRQ(ENCODER_RIGHT_INT_IRQN); // 打开右轮编码器 GPIO 中断
+    NVIC_EnableIRQ(GPIO_MULTIPLE_GPIOB_INT_IRQN); // 打开右轮编码器和按键所在 GPIOB 中断
+}
+
+void GROUP1_IRQHandler(void)
+{
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    uint32_t left_status = DL_GPIO_getEnabledInterruptStatus(ENCODER_LEFT_PORT,
+        ENCODER_LEFT_LEFT_A_PIN | ENCODER_LEFT_LEFT_B_PIN); // 左轮 AB 相触发状态
+    uint32_t right_status = DL_GPIO_getEnabledInterruptStatus(ENCODER_RIGHT_PORT,
+        ENCODER_RIGHT_RIGHT_A_PIN | ENCODER_RIGHT_RIGHT_B_PIN); // 右轮 AB 相触发状态
+    uint32_t key_status = DL_GPIO_getEnabledInterruptStatus(KEY_PORT,
+        KEY_PIN_21_PIN); // 按键中断触发状态
+
+    if (left_status != 0U) { // 左轮 A/B 任意一相发生边沿变化
+        DL_GPIO_clearInterruptStatus(ENCODER_LEFT_PORT, left_status); // 先清左轮中断标志
+        uint8_t state = encoder_read_state(
+            ENCODER_LEFT_PORT, ENCODER_LEFT_LEFT_A_PIN, ENCODER_LEFT_LEFT_B_PIN); // 读取左轮当前 AB 状态
+        int8_t delta = encoder_decode_delta(encoder_left_last_state, state); // 根据新旧状态算本次增量
+
+        encoder_left_count += ((int32_t) delta * ENCODER_LEFT_DIR); // 乘方向系数后累计到左轮计数
+        encoder_left_last_state = state; // 保存本次状态，下一次解码要用
+    }
+
+    if (right_status != 0U) { // 右轮 A/B 任意一相发生边沿变化
+        DL_GPIO_clearInterruptStatus(ENCODER_RIGHT_PORT, right_status); // 先清右轮中断标志
+        uint8_t state = encoder_read_state(
+            ENCODER_RIGHT_PORT, ENCODER_RIGHT_RIGHT_A_PIN,
+            ENCODER_RIGHT_RIGHT_B_PIN); // 读取右轮当前 AB 状态
+        int8_t delta = encoder_decode_delta(encoder_right_last_state, state); // 根据新旧状态算本次增量
+
+        encoder_right_count += ((int32_t) delta * ENCODER_RIGHT_DIR); // 乘方向系数后累计到右轮计数
+        encoder_right_last_state = state; // 保存本次状态，下一次解码要用
+    }
+
+    if (key_status != 0U) { // 按键按下
+        DL_GPIO_clearInterruptStatus(KEY_PORT, key_status); // 清除按键中断标志
+        if (button_sem != NULL) {
+            xSemaphoreGiveFromISR(button_sem, &xHigherPriorityTaskWoken);
+        }
+    }
+
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
 EncoderSample encoder_get_and_clear(void)
@@ -85,33 +130,4 @@ float encoder_right_count_to_rpm(int32_t count)
 {
     return ((float) count / ENCODER_RIGHT_COUNTS_PER_REV)
         * (60.0f / ENCODER_SAMPLE_PERIOD_S); // 右轮计数换算成 RPM
-}
-
-void GROUP1_IRQHandler(void)
-{
-    uint32_t left_status = DL_GPIO_getEnabledInterruptStatus(ENCODER_LEFT_PORT,
-        ENCODER_LEFT_LEFT_A_PIN | ENCODER_LEFT_LEFT_B_PIN); // 左轮 AB 相触发状态
-    uint32_t right_status = DL_GPIO_getEnabledInterruptStatus(ENCODER_RIGHT_PORT,
-        ENCODER_RIGHT_RIGHT_A_PIN | ENCODER_RIGHT_RIGHT_B_PIN); // 右轮 AB 相触发状态
-
-    if (left_status != 0U) { // 左轮 A/B 任意一相发生边沿变化
-        DL_GPIO_clearInterruptStatus(ENCODER_LEFT_PORT, left_status); // 先清左轮中断标志
-        uint8_t state = encoder_read_state(
-            ENCODER_LEFT_PORT, ENCODER_LEFT_LEFT_A_PIN, ENCODER_LEFT_LEFT_B_PIN); // 读取左轮当前 AB 状态
-        int8_t delta = encoder_decode_delta(encoder_left_last_state, state); // 根据新旧状态算本次增量
-
-        encoder_left_count += ((int32_t) delta * ENCODER_LEFT_DIR); // 乘方向系数后累计到左轮计数
-        encoder_left_last_state = state; // 保存本次状态，下一次解码要用
-    }
-
-    if (right_status != 0U) { // 右轮 A/B 任意一相发生边沿变化
-        DL_GPIO_clearInterruptStatus(ENCODER_RIGHT_PORT, right_status); // 先清右轮中断标志
-        uint8_t state = encoder_read_state(
-            ENCODER_RIGHT_PORT, ENCODER_RIGHT_RIGHT_A_PIN,
-            ENCODER_RIGHT_RIGHT_B_PIN); // 读取右轮当前 AB 状态
-        int8_t delta = encoder_decode_delta(encoder_right_last_state, state); // 根据新旧状态算本次增量
-
-        encoder_right_count += ((int32_t) delta * ENCODER_RIGHT_DIR); // 乘方向系数后累计到右轮计数
-        encoder_right_last_state = state; // 保存本次状态，下一次解码要用
-    }
 }

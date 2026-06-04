@@ -1,65 +1,124 @@
 #include "2task.h"
-#define TELEMETRY_PERIOD_MS (200U) // 串口监视输出周期，过快会占用较多串口带宽
+#include "button.h"
+#include "oled.h"
+#include "pid.h"
+#include "projdefs.h"
+#include "track.h"
+#include <stdio.h>
 
-void UART(void *pvParameters)
+SemaphoreHandle_t            button_sem;
+volatile uint8_t             button_task;
+extern PID                   pid_left;
+extern PID                   pid_right;
+
+static volatile TrackInfo line_follow_track_info; // 循迹任务保存给遥测显示任务使用
+
+void OLED(void *pvParameters)
 {
-    char text[180]; // 保存一行串口监视文本
+    char text[22]; // 128 像素宽度下 6x8 字体最多显示 21 个 ASCII 字符
     ControlTelemetry data; // 保存控制模块提供的状态快照
     TickType_t last_wake_time = xTaskGetTickCount(); // 记录固定周期起点
     (void) pvParameters; // 当前任务不需要入口参数
-    while (1) {
-        UART_SendString("lcnt,rcnt,lrpm,rrpm,lpwm,rpwm,raw,track,error,valid\r\n"); // 打印列名
-        control_get_telemetry(&data); // 获取最新左右轮和循迹数据
 
-        snprintf(text, sizeof(text),
-            "%ld,%ld,%ld,%ld,%ld,%ld,0x%02X,%c%c%c%c%c%c%c%c,%d,%u\r\n",
-            (long) data.left_count, // 左轮最近 10ms 编码器计数
-            (long) data.right_count, // 右轮最近 10ms 编码器计数
-            (long) data.left_rpm, // 左轮当前 RPM，串口中取整数便于观察
-            (long) data.right_rpm, // 右轮当前 RPM
-            (long) data.left_pwm, // 左轮当前带符号 PWM
-            (long) data.right_pwm, // 右轮当前带符号 PWM
-            (unsigned int) data.track_raw, // 八路循迹原始十六进制值
-            ((data.track_raw & (1U << 0)) != 0U) ? '1' : '0', // bit0：最左侧探头
+    OLED_Clear();
+
+    while (1) {
+        control_get_telemetry(&data); // 获取最新左右轮和循迹数据
+        taskENTER_CRITICAL();
+        data.track_raw = line_follow_track_info.raw;
+        data.track_error = line_follow_track_info.error;
+        data.track_valid = line_follow_track_info.valid;
+        taskEXIT_CRITICAL();
+
+        snprintf(text, sizeof(text), "RPM L%4ld R%4ld    ",
+            (long) data.left_rpm,
+            (long) data.right_rpm);
+        OLED_ShowString(0, 0, (uint8_t *) text, 8);
+
+        snprintf(text, sizeof(text), "PWM L%4ld R%4ld    ",
+            (long) data.left_pwm,
+            (long) data.right_pwm);
+        OLED_ShowString(0, 1, (uint8_t *) text, 8);
+
+        snprintf(text, sizeof(text), "CNT L%4ld R%4ld    ",
+            (long) data.left_count,
+            (long) data.right_count);
+        OLED_ShowString(0, 2, (uint8_t *) text, 8);
+
+        snprintf(text, sizeof(text), "RAW 0x%02X          ",
+            (unsigned int) data.track_raw);
+        OLED_ShowString(0, 3, (uint8_t *) text, 8);
+
+        snprintf(text, sizeof(text), "TRK %c%c%c%c%c%c%c%c       ",
+            ((data.track_raw & (1U << 0)) != 0U) ? '1' : '0',
             ((data.track_raw & (1U << 1)) != 0U) ? '1' : '0',
             ((data.track_raw & (1U << 2)) != 0U) ? '1' : '0',
             ((data.track_raw & (1U << 3)) != 0U) ? '1' : '0',
             ((data.track_raw & (1U << 4)) != 0U) ? '1' : '0',
             ((data.track_raw & (1U << 5)) != 0U) ? '1' : '0',
             ((data.track_raw & (1U << 6)) != 0U) ? '1' : '0',
-            ((data.track_raw & (1U << 7)) != 0U) ? '1' : '0', // bit7：最右侧探头
-            (int) data.track_error, // 循迹偏差，左负右正
-            (unsigned int) data.track_valid); // 当前是否有可用循迹偏差
+            ((data.track_raw & (1U << 7)) != 0U) ? '1' : '0');
+        OLED_ShowString(0, 4, (uint8_t *) text, 8);
 
-        UART_SendString(text);
-        vTaskDelayUntil(&last_wake_time, pdMS_TO_TICKS(TELEMETRY_PERIOD_MS)); // 每 200ms 打印一次
+        snprintf(text, sizeof(text), "ERR %4d V%u        ",
+            (int) data.track_error,
+            (unsigned int) data.track_valid);
+        OLED_ShowString(0, 5, (uint8_t *) text, 8);
+
+        vTaskDelayUntil(&last_wake_time, pdMS_TO_TICKS(TELEMETRY_PERIOD_MS)); // 每 200ms 刷新一次
     }
 }
 
 void Line_Follow(void *pvParameters)
 {
-    (void) pvParameters;
     uint32_t track_age_ms = TIMEOUT_MS;                                  // 上电还没收到循迹帧，先按超时处理
-    TickType_t last_wake_time = xTaskGetTickCount();                      // 记录循迹任务的固定周期起点
+    TickType_t last_wake_time = xTaskGetTickCount();                     // 记录循迹任务的固定周期起点
+    int8_t last_error = 0;                                                // 上一次循迹偏差，给 D 项使用
+    float last_turn = 0.0f;                                               // 上一次循迹修正量，用来做简单平滑
+
+    (void) pvParameters;
 
     while (1) {
-        if (Track_receive() != 0U) track_age_ms = 0U;                    // 收到新帧就清零超时计数
-        else if (track_age_ms < TIMEOUT_MS) track_age_ms += LOOP_MS;     // 没收到新帧就累计等待时间
+        if (Track_receive() != 0U) {
+            track_age_ms = 0U;                                           // 收到新帧就清零超时计数
+        } else if (track_age_ms < TIMEOUT_MS) {
+            track_age_ms += LOOP_MS;                                     // 没收到新帧就累计等待时间
+        }
 
         TrackInfo info = Track_get_info();                               // 获取最新 raw 和循迹偏差
-        telemetry.track_raw = info.raw;                                  // 保存八路循迹原始值，给串口监视任务打印
-        telemetry.track_error = info.error;                              // 保存当前循迹偏差
-        telemetry.track_valid = info.valid;                              // 保存当前循迹偏差是否可用
+        taskENTER_CRITICAL();
+        line_follow_track_info.raw = info.raw;
+        line_follow_track_info.error = info.error;
+        line_follow_track_info.valid = info.valid;
+        taskEXIT_CRITICAL();
 
         if ((info.valid == 0U) || (track_age_ms >= TIMEOUT_MS)) {
-            pid_set_target(&pid_left, 0.0f);                              // 没有可靠循迹数据时左轮停车
-            pid_set_target(&pid_right, 0.0f);                             // 没有可靠循迹数据时右轮停车
+            taskENTER_CRITICAL();
+            pid_set_target(&pid_left, 0.0f);                              // 没有可靠循迹数据时左右轮停车
+            pid_set_target(&pid_right, 0.0f);
+            taskEXIT_CRITICAL();
             last_error = 0;                                               // 清掉循迹 D 项历史偏差，恢复后重新计算
             last_turn = 0.0f;                                             // 清掉转向平滑量，恢复后避免突然打一把
         } else {
-            float turn = control_calc_turn_rpm(info.error);              // 计算转向差速
-            pid_set_target(&pid_left,  BASE_RPM + turn);                  // 更新左轮 RPM
-            pid_set_target(&pid_right, BASE_RPM - turn);                       // 更新右轮 RPM
+            float p = (float) info.error * LINE_FOLLOW_KP;                 // P 项：当前位置偏差带来的修正
+            float d = (float) (info.error - last_error) *
+                LINE_FOLLOW_KD;                                          // D 项：偏差变化带来的修正
+            float turn = p + d;                                          // 计算转向差速
+
+            if (turn > TURN_RPM) {
+                turn = TURN_RPM;
+            } else if (turn < -TURN_RPM) {
+                turn = -TURN_RPM;
+            }
+
+            turn = 0.75f * turn + 0.25f * last_turn;                     // 对转向输出做一点平滑
+            last_error = info.error;
+            last_turn = turn;
+
+            taskENTER_CRITICAL();
+            pid_set_target(&pid_left, BASE_RPM + turn);                  // 更新左右轮 RPM
+            pid_set_target(&pid_right, BASE_RPM - turn);
+            taskEXIT_CRITICAL();
         }
 
         vTaskDelayUntil(&last_wake_time, pdMS_TO_TICKS(LOOP_MS));         // 每 5ms 唤醒一次，不阻塞其他 FreeRTOS 任务
@@ -68,3 +127,22 @@ void Line_Follow(void *pvParameters)
     vTaskDelete(NULL); // 理论上不会执行到这里
 }
 
+void KEY(void *pvParameters)
+{
+    (void) pvParameters;
+
+    while (1) {
+        if (xSemaphoreTake(button_sem, portMAX_DELAY) == pdTRUE) {   //等信号量
+            vTaskDelay(pdMS_TO_TICKS(20));                          //消抖
+
+            if (Button_is_pressed()) {
+                Button_switch();                                    //切换下一个任务模式
+
+                while (Button_is_pressed()) {
+                    vTaskDelay(pdMS_TO_TICKS(10));                  //等松手
+                }
+                vTaskDelay(pdMS_TO_TICKS(10));                      //松手消抖
+            }
+        }
+    }
+}

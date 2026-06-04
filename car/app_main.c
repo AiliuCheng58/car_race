@@ -1,13 +1,13 @@
 #include "app_main.h"
 
-#include "control.h"
-#include "uart.h"
-
 #include "FreeRTOS.h"
+#include "FreeRTOSConfig.h"
 #include "task.h"
 
 #include <stdint.h>
 #include <stdio.h>
+
+#include "2task.h"
 
 void app_main(void)
 {
@@ -16,22 +16,38 @@ void app_main(void)
     result = xTaskCreate(
         Line_Follow, 
         "follow",
-        configMINIMAL_STACK_SIZE * 2U, NULL,
-        tskIDLE_PRIORITY + 2U, NULL); // 循迹任务优先级较高，每 5ms 更新左右轮目标速度
-    configASSERT(result == pdPASS); // 创建失败时停在断言处
+        configMINIMAL_STACK_SIZE * 2U, 
+        NULL,
+        tskIDLE_PRIORITY + 2U, 
+        NULL);                                  // 循迹任务优先级较高，每 5ms 更新左右轮目标速度
+    configASSERT(result == pdPASS);             // 创建失败时停在断言处
 
     result = xTaskCreate(
-        UART, 
-        "uart",
-        configMINIMAL_STACK_SIZE * 3U, NULL,
-        tskIDLE_PRIORITY + 1U, NULL); // 串口监视任务优先级较低，避免影响循迹
-    configASSERT(result == pdPASS); // 创建失败时停在断言处
+        OLED,
+        "oled",
+        configMINIMAL_STACK_SIZE * 3U, 
+        NULL,
+        tskIDLE_PRIORITY + 1U, 
+        NULL);                                  // OLED 显示任务优先级较低，避免影响循迹
+    configASSERT(result == pdPASS);             // 创建失败时停在断言处
+
+    result = xTaskCreate(
+        KEY, 
+        "key", 
+        configMINIMAL_STACK_SIZE, 
+        NULL, 
+        tskIDLE_PRIORITY + 1U, 
+        NULL);                                  // 按键任务
 
     vTaskStartScheduler(); // 启动 FreeRTOS 调度器
+    configASSERT(result == pdPASS);             // 创建失败时停在断言处
 
     while (1) { // 正常情况下调度器启动后不会返回
     }
 }
+
+
+
 
 #if (configSUPPORT_STATIC_ALLOCATION == 1)
 void vApplicationGetIdleTaskMemory(StaticTask_t **task_buffer,
