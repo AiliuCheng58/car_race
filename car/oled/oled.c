@@ -97,15 +97,21 @@ void Send_Byte(uint8_t dat)
 //mode:数据/命令标志 0,表示命令;1,表示数据;
 void OLED_WR_Byte(uint8_t dat,uint8_t mode)
 {
-    I2C_Start();
-    Send_Byte(0x78);
-    I2C_WaitAck();
-    if(mode){Send_Byte(0x40);}
-    else{Send_Byte(0x00);}
-    I2C_WaitAck();
-    Send_Byte(dat);
-    I2C_WaitAck();
-    I2C_Stop();
+    uint8_t addr_index;
+
+    for (addr_index = 0; addr_index < 2U; addr_index++) {
+        uint8_t address = (addr_index == 0U) ? 0x78U : 0x7AU;
+
+        I2C_Start();
+        Send_Byte(address);
+        I2C_WaitAck();
+        if(mode){Send_Byte(0x40);}
+        else{Send_Byte(0x00);}
+        I2C_WaitAck();
+        Send_Byte(dat);
+        I2C_WaitAck();
+        I2C_Stop();
+    }
 }
 
 

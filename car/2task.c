@@ -65,6 +65,10 @@ void OLED(void *pvParameters)
             (unsigned int) data.track_valid);
         OLED_ShowString(0, 5, (uint8_t *) text, 8);
 
+        snprintf(text, sizeof(text), "OLED RUN %lu       ",
+            (unsigned long) (xTaskGetTickCount() / pdMS_TO_TICKS(1000U)));
+        OLED_ShowString(0, 6, (uint8_t *) text, 8);
+
         vTaskDelayUntil(&last_wake_time, pdMS_TO_TICKS(TELEMETRY_PERIOD_MS)); // 每 200ms 刷新一次
     }
 }

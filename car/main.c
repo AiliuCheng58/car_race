@@ -5,6 +5,7 @@
 
 #include "app_main.h"
 #include "control.h"
+#include "delay.h"
 #include "encode.h"
 #include "motor.h"
 #include "oled.h"
@@ -19,6 +20,12 @@ int main(void)
     encoder_init();                                 // 初始化编码器 AB 相初始状态，并打开 GPIO 中断
     UART_init();                                    // 打开 UART 接收中断，后面用于循迹数据和 PID 串口调参
     OLED_Init();                                    // 初始化板载显示接口上的 4 针 I2C OLED
+    OLED_WR_Byte(0xA5, OLED_CMD);                   // 全屏点亮 1 秒，用来确认 OLED 通信和供电是否正常
+    delay_ms(1000U);
+    OLED_WR_Byte(0xA4, OLED_CMD);
+    OLED_Clear();
+    OLED_ShowString(0, 0, (uint8_t *) "OLED BOOT", 8);
+    OLED_ShowString(0, 1, (uint8_t *) "SCL PB9 SDA PB8", 8);
 
     control_init();                                 // 初始化左右轮速度环，默认目标速度为 0
 
