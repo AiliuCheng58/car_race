@@ -75,6 +75,7 @@ void OLED(void *pvParameters)
 
 void Line_Follow(void *pvParameters)
 {
+    
     uint32_t track_age_ms = TIMEOUT_MS;                                  // 上电还没收到循迹帧，先按超时处理
     TickType_t last_wake_time = xTaskGetTickCount();                     // 记录循迹任务的固定周期起点
     int8_t last_error = 0;                                                // 上一次循迹偏差，给 D 项使用
@@ -105,8 +106,7 @@ void Line_Follow(void *pvParameters)
             last_turn = 0.0f;                                             // 清掉转向平滑量，恢复后避免突然打一把
         } else {
             float p = (float) info.error * LINE_FOLLOW_KP;                 // P 项：当前位置偏差带来的修正
-            float d = (float) (info.error - last_error) *
-                LINE_FOLLOW_KD;                                          // D 项：偏差变化带来的修正
+            float d = (float) (info.error - last_error) * LINE_FOLLOW_KD;  // D 项：偏差变化带来的修正
             float turn = p + d;                                          // 计算转向差速
 
             if (turn > TURN_RPM) {
@@ -120,8 +120,8 @@ void Line_Follow(void *pvParameters)
             last_turn = turn;
 
             taskENTER_CRITICAL();
-            pid_set_target(&pid_left, BASE_RPM + turn);                  // 更新左右轮 RPM
-            pid_set_target(&pid_right, BASE_RPM - turn);
+            pid_set_target(&pid_left, BASE_RPM - turn);                  // 更新左右轮 RPM
+            pid_set_target(&pid_right, BASE_RPM + turn);
             taskEXIT_CRITICAL();
         }
 

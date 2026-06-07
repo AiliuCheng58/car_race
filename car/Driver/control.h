@@ -3,10 +3,10 @@
 
 #include <stdint.h>
 
-#define BASE_RPM            (50.0f)  // 基础前进速度，偏差为 0 时左右轮都跑这个 RPM
-#define LINE_FOLLOW_KP      (7.0f)   // 循迹 P 系数，偏差越大，左右轮速度差越大
+#define BASE_RPM            (100.0f)  // 基础前进速度，偏差为 0 时左右轮都跑这个 RPM
+#define LINE_FOLLOW_KP      (10.0f)   // 循迹 P 系数，偏差越大，左右轮速度差越大
 #define LINE_FOLLOW_KD      (2.0f)   // 循迹 D 系数，偏差变化越快，提前加一点修正
-#define TURN_RPM            (35.0f)  // 循迹修正量限幅，避免一偏就原地打转
+#define TURN_RPM            (100.0f)  // 循迹修正量限幅，避免一偏就原地打转
 #define LOOP_MS             (5U)     // 主循环刷新周期，单位 ms
 #define TIMEOUT_MS          (500U)   // 超过这个时间没有新循迹帧就停车
 #define TELEMETRY_PERIOD_MS (200U)   // 遥测显示刷新周期，过快会占用较多任务时间

@@ -11,7 +11,7 @@ static uint8_t Track_line(uint8_t raw, int8_t *error)
 {
     // bit0 在最左，bit7 在最右，左负右正
     static const int8_t weight[8] = {
-        -7, -5, -3, -1, 1, 3, 5, 7
+        -14, -10, -6, -3, 3, 6, 10, 14
     };
     int16_t sum = 0;
     uint8_t count = 0U;

@@ -120,12 +120,12 @@ GPIO7.associatedPins[0].interruptEn      = true;
 GPIO7.associatedPins[0].polarity         = "FALL";
 
 GPIO8.$name                         = "GPIO_OLED";
-GPIO8.port                          = "PORTB";
+GPIO8.port                          = "PORTA";
 GPIO8.associatedPins.create(2);
 GPIO8.associatedPins[0].$name       = "PIN_SCL";
-GPIO8.associatedPins[0].pin.$assign = "PB9";
+GPIO8.associatedPins[0].pin.$assign = "PA16";
 GPIO8.associatedPins[1].$name       = "PIN_SDA";
-GPIO8.associatedPins[1].pin.$assign = "PB8";
+GPIO8.associatedPins[1].pin.$assign = "PA17";
 
 I2C1.$name                             = "MPU6050";
 I2C1.basicEnableController             = true;
@@ -136,10 +136,10 @@ I2C1.sdaPinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric0";
 I2C1.sdaPinConfig.hideOutputInversion  = scripting.forceWrite(false);
 I2C1.sdaPinConfig.onlyInternalResistor = scripting.forceWrite(false);
 I2C1.sdaPinConfig.passedPeripheralType = scripting.forceWrite("Digital");
-I2C1.sclPinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric2";
 I2C1.sclPinConfig.hideOutputInversion  = scripting.forceWrite(false);
 I2C1.sclPinConfig.onlyInternalResistor = scripting.forceWrite(false);
 I2C1.sclPinConfig.passedPeripheralType = scripting.forceWrite("Digital");
+I2C1.sclPinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric2";
 
 PWM1.$name                          = "PWM_0";
 PWM1.pwmMode                        = "EDGE_ALIGN_UP";

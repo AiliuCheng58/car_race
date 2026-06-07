@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define PID_DEFAULT_KP  (1.1f)          // 默认比例系数，影响纠正力度
+#define PID_DEFAULT_KP  (2.0f)          // 默认比例系数，影响纠正力度
 #define PID_DEFAULT_KI  (0.0f)          // 默认先关闭积分，确认反馈方向正确后再逐步加
 #define PID_DEFAULT_KD  (0.0f)          // 默认微分系数，先关闭，避免编码器噪声放大
 #define PID_TARGET_DEADBAND_RPM (1.0f)  // 目标转速低于这个值时直接认为是停车
