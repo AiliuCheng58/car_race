@@ -5,7 +5,7 @@
 
 volatile uint8_t track = 0;
 
-volatile uint16_t TRACK_THRESHOLD[8]={2900, 2800, 2900, 3000, 3500, 3700, 3800, 3000};
+volatile uint16_t TRACK_THRESHOLD[8]={2900, 2800, 2900, 2800, 3200, 3100, 3600, 3000};
 
 volatile uint16_t adc0[4]={0};
 volatile uint16_t adc1[4]={0};
