@@ -7,8 +7,8 @@
 
 extern SemaphoreHandle_t button_sem;
 
-static volatile int32_t encoder_left_count = 0; // 左轮累计编码器计数，中断和 PID 定时器都会访问
-static volatile int32_t encoder_right_count = 0; // 右轮累计编码器计数，中断和 PID 定时器都会访问
+static volatile int32_t encoder_left_count = 0; // 左轮累计编码器计数，中断里更新，其他模块只读取快照
+static volatile int32_t encoder_right_count = 0; // 右轮累计编码器计数，中断里更新，其他模块只读取快照
 static uint8_t encoder_left_last_state = 0; // 左轮上一次 AB 相状态，用于判断本次转动方向
 static uint8_t encoder_right_last_state = 0; // 右轮上一次 AB 相状态，用于判断本次转动方向
 
@@ -64,6 +64,31 @@ void encoder_init(void)
     NVIC_EnableIRQ(GPIO_MULTIPLE_GPIOB_INT_IRQN); // 打开右轮编码器和按键所在 GPIOB 中断
 }
 
+EncoderSample encoder_get_total(void)
+{
+    EncoderSample sample;                           // 保存左右轮累计计数快照
+    uint32_t primask = __get_PRIMASK();             // 保存原中断状态
+
+    __disable_irq();                                // 读取快照时避免编码器中断打断
+    sample.left = encoder_left_count;               // 保存左轮累计计数
+    sample.right = encoder_right_count;             // 保存右轮累计计数
+    __set_PRIMASK(primask);                         // 恢复原中断状态
+
+    return sample;                                  // 返回刚刚保存的左右轮累计计数
+}
+
+float encoder_left_count_to_rpm(int32_t count)
+{
+    return ((float) count / ENCODER_LEFT_COUNTS_PER_REV)
+        * (60.0f / ENCODER_SAMPLE_PERIOD_S); // 左轮计数换算成 RPM
+}
+
+float encoder_right_count_to_rpm(int32_t count)
+{
+    return ((float) count / ENCODER_RIGHT_COUNTS_PER_REV)
+        * (60.0f / ENCODER_SAMPLE_PERIOD_S); // 右轮计数换算成 RPM
+}
+
 void GROUP1_IRQHandler(void)
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
@@ -103,31 +128,4 @@ void GROUP1_IRQHandler(void)
     }
 
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-}
-
-EncoderSample encoder_get_and_clear(void)
-{
-    EncoderSample sample;                           // 保存一个 PID 周期内的左右轮计数
-    uint32_t primask = __get_PRIMASK();             // 保存原中断状态
-
-    __disable_irq();                                // 读取并清零时避免编码器中断打断
-    sample.left = encoder_left_count;               // 保存左轮本周期计数
-    sample.right = encoder_right_count;             // 保存右轮本周期计数
-    encoder_left_count = 0;                         // 左轮计数清零，开始下一个 PID 周期
-    encoder_right_count = 0;                        // 右轮计数清零，开始下一个 PID 周期
-    __set_PRIMASK(primask);                         // 恢复原中断状态
-
-    return sample;                                  // 返回刚刚保存的左右轮增量
-}
-
-float encoder_left_count_to_rpm(int32_t count)
-{
-    return ((float) count / ENCODER_LEFT_COUNTS_PER_REV)
-        * (60.0f / ENCODER_SAMPLE_PERIOD_S); // 左轮计数换算成 RPM
-}
-
-float encoder_right_count_to_rpm(int32_t count)
-{
-    return ((float) count / ENCODER_RIGHT_COUNTS_PER_REV)
-        * (60.0f / ENCODER_SAMPLE_PERIOD_S); // 右轮计数换算成 RPM
 }

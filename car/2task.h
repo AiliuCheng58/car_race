@@ -4,13 +4,11 @@
 #include <stdint.h>
 
 #include "FreeRTOS.h"
-#include "task.h"
 #include "semphr.h"
 
-#include "control.h"
-#include "uart.h"
-#include "encode.h"
-#include "projdefs.h"
+#define BUTTON_TASK_IDLE        (0U) // 空闲模式，上电默认停在这里
+#define BUTTON_TASK_LINE_FOLLOW (1U) // 循迹模式，按键第一次切到这里
+#define BUTTON_TASK_MODE_COUNT  (4U) // 预留后续任务模式数量
 
 extern SemaphoreHandle_t          button_sem;
 extern volatile uint8_t           button_task;

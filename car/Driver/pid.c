@@ -253,8 +253,11 @@ void pid_read(PID *left_pid, PID *right_pid)
         return;
     }
 
+    primask = __get_PRIMASK();
+    __disable_irq();
     pid_write_params(left_pid, has_kp, kp, has_ki, ki, has_kd, kd);
     pid_write_params(right_pid, has_kp, kp, has_ki, ki, has_kd, kd);
+    __set_PRIMASK(primask);
 
     UART_SendString("PID OK\r\n");
 }

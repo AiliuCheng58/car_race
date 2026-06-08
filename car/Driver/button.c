@@ -9,7 +9,7 @@ void Button_init(void)
 {
     button_sem = xSemaphoreCreateBinary();
     configASSERT(button_sem != NULL);
-    button_task = 1;
+    button_task = BUTTON_TASK_IDLE;
 
     DL_GPIO_clearInterruptStatus(KEY_PORT, KEY_PIN_21_PIN);
     NVIC_ClearPendingIRQ(GPIO_MULTIPLE_GPIOB_INT_IRQN);
@@ -22,5 +22,5 @@ uint8_t Button_is_pressed(void)
 
 void Button_switch(void)
 {
-    button_task = (button_task + 1) % 4;
+    button_task = (button_task + 1U) % BUTTON_TASK_MODE_COUNT;
 }
