@@ -1,6 +1,7 @@
 #include "2task.h"
 #include "button.h"
 #include "control.h"
+#include "odom/odom.h"
 #include "oled.h"
 #include "track.h"
 
@@ -17,18 +18,27 @@
 #define LINE_FOLLOW_TIMEOUT_MS          (500U)   // 超过这个时间没有新循迹帧就停车
 #define OLED_TELEMETRY_PERIOD_MS        (200U)   // 遥测显示刷新周期，过快会占用较多任务时间
 
+#define ROAD_CIR                        (1.256f) // 半圆赛道长度
+#define ROAD_WHITE                      (1.281f) // 白区斜线长度
+#define ANGLE_KP                        (5.0f)   // 角度 P 系数
+#define ANGLE_KD                        (1.0f)   // 角度 D 系数
+
 SemaphoreHandle_t            button_sem;
 volatile uint8_t             button_task;
+
+static volatile RaceSegment  SEG = SEG_A2C;       // 状态机初始状态
 
 static volatile TrackInfo line_follow_track_info; // 循迹任务保存给遥测显示任务使用
 
 void Line_Follow(void *pvParameters)
 {
-    
     uint32_t track_age_ms = LINE_FOLLOW_TIMEOUT_MS;                      // 上电还没收到循迹帧，先按超时处理
     TickType_t last_wake_time = xTaskGetTickCount();                     // 记录循迹任务的固定周期起点
     int8_t last_error = 0;                                                // 上一次循迹偏差，给 D 项使用
     float last_turn = 0.0f;                                               // 上一次循迹修正量，用来做简单平滑
+    float p, d, turn;
+    float last_angle_err = 0.0f;
+    float angle_err = 0.0f;
 
     (void) pvParameters;
 
@@ -37,6 +47,7 @@ void Line_Follow(void *pvParameters)
             control_stop();                                               // 未按键进入循迹模式前保持停车
             track_age_ms = LINE_FOLLOW_TIMEOUT_MS;                        // 进入循迹后先等待新帧
             last_error = 0;                                               // 清掉循迹 D 项历史偏差
+            last_angle_err = 0.0f;
             last_turn = 0.0f;                                             // 清掉转向平滑量
 
             taskENTER_CRITICAL();
@@ -49,47 +60,113 @@ void Line_Follow(void *pvParameters)
             continue;
         }
 
-        if (Track_receive() != 0U) {
-            track_age_ms = 0U;                                           // 收到新帧就清零超时计数
-        } else if (track_age_ms < LINE_FOLLOW_TIMEOUT_MS) {
-            track_age_ms += LINE_FOLLOW_PERIOD_MS;                       // 没收到新帧就累计等待时间
+        switch(SEG){
+            case SEG_A2C:
+                odom_update();
+
+                angle_err = odom_wrap180(odom.target_A2C - odom.theta);
+                p = (float) angle_err * ANGLE_KP;
+                d = (float) (angle_err - last_angle_err) * ANGLE_KD;
+                turn = p + d;
+
+                if (turn > LINE_FOLLOW_TURN_RPM)
+                    turn = LINE_FOLLOW_TURN_RPM;
+                else if (turn < -LINE_FOLLOW_TURN_RPM)
+                    turn = -LINE_FOLLOW_TURN_RPM;
+                
+                turn = 0.75f * turn + 0.25f * last_turn;                     // 对转向输出做一点平滑
+                last_angle_err = angle_err;
+                last_turn = turn;
+                control_set_target_rpm(
+                    LINE_FOLLOW_BASE_RPM - turn,
+                    LINE_FOLLOW_BASE_RPM + turn);                            // 更新左右轮目标 RPM
+                if (odom.distance + odom.death >= ROAD_WHITE && odom.distance - odom.death <= ROAD_WHITE) {
+                    SEG = SEG_FOLLOW;
+                    odom_clear();
+                    last_angle_err = 0;
+                    last_turn = 0.0f;
+                }
+                break;
+            case SEG_FOLLOW:
+                odom_update();
+
+                if (Track_receive() != 0U)
+                    track_age_ms = 0U;                                           // 收到新帧就清零超时计数
+                else if (track_age_ms < LINE_FOLLOW_TIMEOUT_MS)
+                    track_age_ms += LINE_FOLLOW_PERIOD_MS;                       // 没收到新帧就累计等待时间
+
+                TrackInfo info = Track_get_info();                               // 获取最新寻迹数据
+                taskENTER_CRITICAL();
+                line_follow_track_info.raw = info.raw;
+                line_follow_track_info.error = info.error;
+                line_follow_track_info.valid = info.valid;
+                taskEXIT_CRITICAL();
+
+                if ((info.valid == 0U) || (track_age_ms >= LINE_FOLLOW_TIMEOUT_MS)) {
+                    control_stop();                                              // 没有可靠寻迹数据就停车
+                    last_error = 0;                                              // 清除寻迹D项历史偏差
+                    last_turn = 0.0f;                                            // 清除转向平滑量
+                }
+                else {
+                    p = (float) info.error * LINE_FOLLOW_KP;                 // P 项：当前位置偏差带来的修正
+                    d = (float) (info.error - last_error) * LINE_FOLLOW_KD;  // D 项：偏差变化带来的修正
+                    turn = p + d;                                            // 计算转向差速
+
+                    if (turn > LINE_FOLLOW_TURN_RPM)
+                        turn = LINE_FOLLOW_TURN_RPM;
+                    else if (turn < -LINE_FOLLOW_TURN_RPM)
+                        turn = -LINE_FOLLOW_TURN_RPM;
+
+                    turn = 0.75f * turn + 0.25f * last_turn;                     // 对转向输出做一点平滑
+                    last_error = info.error;
+                    last_turn = turn;
+
+                    control_set_target_rpm(
+                                    LINE_FOLLOW_BASE_RPM - turn,
+                                    LINE_FOLLOW_BASE_RPM + turn);                 // 更新左右轮目标 RPM
+                }
+                
+                if (odom.distance + odom.death >= ROAD_CIR && odom.distance - odom.death <= ROAD_CIR) {
+                    if (odom.theta > 0)
+                        SEG = SEG_A2C;
+                    else
+                        SEG = SEG_B2D;
+                    odom_clear();
+                    last_error = 0;
+                    last_turn = 0.0f;
+                }
+                break;
+            case SEG_B2D:
+                odom_update();
+                
+                angle_err = odom_wrap180(odom.target_B2D - odom.theta);
+                p = (float) angle_err * ANGLE_KP;
+                d = (float) (angle_err - last_angle_err) * ANGLE_KD;
+                turn = p + d;
+
+                if (turn > LINE_FOLLOW_TURN_RPM)
+                    turn = LINE_FOLLOW_TURN_RPM;
+                else if (turn < -LINE_FOLLOW_TURN_RPM)
+                    turn = -LINE_FOLLOW_TURN_RPM;
+                
+                turn = 0.75f * turn + 0.25f * last_turn;                     // 对转向输出做一点平滑
+                last_angle_err = angle_err;
+                last_turn = turn;
+                control_set_target_rpm(
+                    LINE_FOLLOW_BASE_RPM - turn,
+                    LINE_FOLLOW_BASE_RPM + turn);                            // 更新左右轮目标 RPM
+                if (odom.distance + odom.death >= ROAD_WHITE && odom.distance - odom.death <= ROAD_WHITE) {
+                    SEG = SEG_FOLLOW;
+                    odom_clear();
+                    last_angle_err = 0;
+                    last_turn = 0.0f;
+                }
+                break;
+            default:
+                break;
         }
-
-        TrackInfo info = Track_get_info();                               // 获取最新 raw 和循迹偏差
-        taskENTER_CRITICAL();
-        line_follow_track_info.raw = info.raw;
-        line_follow_track_info.error = info.error;
-        line_follow_track_info.valid = info.valid;
-        taskEXIT_CRITICAL();
-
-        if ((info.valid == 0U) || (track_age_ms >= LINE_FOLLOW_TIMEOUT_MS)) {
-            control_stop();                                               // 没有可靠循迹数据时左右轮停车
-            last_error = 0;                                               // 清掉循迹 D 项历史偏差，恢复后重新计算
-            last_turn = 0.0f;                                             // 清掉转向平滑量，恢复后避免突然打一把
-        } else {
-            float p = (float) info.error * LINE_FOLLOW_KP;                 // P 项：当前位置偏差带来的修正
-            float d = (float) (info.error - last_error) * LINE_FOLLOW_KD;  // D 项：偏差变化带来的修正
-            float turn = p + d;                                          // 计算转向差速
-
-            if (turn > LINE_FOLLOW_TURN_RPM) {
-                turn = LINE_FOLLOW_TURN_RPM;
-            } else if (turn < -LINE_FOLLOW_TURN_RPM) {
-                turn = -LINE_FOLLOW_TURN_RPM;
-            }
-
-            turn = 0.75f * turn + 0.25f * last_turn;                     // 对转向输出做一点平滑
-            last_error = info.error;
-            last_turn = turn;
-
-            control_set_target_rpm(
-                LINE_FOLLOW_BASE_RPM - turn,
-                LINE_FOLLOW_BASE_RPM + turn);                            // 更新左右轮目标 RPM
-        }
-
-        vTaskDelayUntil(&last_wake_time, pdMS_TO_TICKS(LINE_FOLLOW_PERIOD_MS)); // 每 5ms 唤醒一次，不阻塞其他 FreeRTOS 任务
+        vTaskDelayUntil(&last_wake_time, pdMS_TO_TICKS(LINE_FOLLOW_PERIOD_MS));    // 每 5ms 唤醒一次，不阻塞其他 FreeRTOS 任务
     }
-
-    vTaskDelete(NULL); // 理论上不会执行到这里
 }
 
 void KEY(void *pvParameters)

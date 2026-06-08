@@ -10,6 +10,7 @@
 #include "motor.h"
 #include "oled.h"
 #include "uart.h"
+#include "odom/odom.h"
 
 int main(void)
 {
@@ -27,6 +28,7 @@ int main(void)
     OLED_ShowString(0, 0, (uint8_t *) "OLED BOOT", 8);
     OLED_ShowString(0, 1, (uint8_t *) "SCL PB9 SDA PB8", 8);
 */
+    odom_init();                                    // 初始化里程计
     control_init();                                 // 初始化左右轮速度环，默认目标速度为 0
 
     NVIC_ClearPendingIRQ(TIMER_0_INST_INT_IRQN);    // 清掉可能残留的 PID 定时器中断标志

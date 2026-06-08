@@ -10,6 +10,12 @@
 #define BUTTON_TASK_LINE_FOLLOW (1U) // 循迹模式，按键第一次切到这里
 #define BUTTON_TASK_MODE_COUNT  (4U) // 预留后续任务模式数量
 
+typedef enum {
+    SEG_A2C,
+    SEG_FOLLOW,
+    SEG_B2D,
+} RaceSegment;
+
 extern SemaphoreHandle_t          button_sem;
 extern volatile uint8_t           button_task;
 
