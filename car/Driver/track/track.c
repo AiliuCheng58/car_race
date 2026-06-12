@@ -1,5 +1,5 @@
 #include "track.h"
-#include "uart.h"
+#include "uart/uart.h"
 #include "ti_msp_dl_config.h"
 
 static volatile uint8_t raw = 0x00U;                    // 最新循迹原始值，上电还没收到帧时先按丢线处理

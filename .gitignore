@@ -1,7 +1,10 @@
 Debug/
 .opencode/
 .setting/
+<<<<<<< Updated upstream
 .settings/
+=======
+>>>>>>> Stashed changes
 setting/
 freertos_builds_LP_MSPM0G3507_release_ticlang/
 .theia/

@@ -9,6 +9,7 @@ int MPU_Write_Len(unsigned char addr, unsigned char reg, unsigned char len, unsi
 int MPU_Read_Len(unsigned char addr, unsigned char reg, unsigned char len, unsigned char *buf);
 
 void mget_ms(unsigned long *time);
+void MPU_delay_ms(unsigned long ms);
 
 // 我们自己封装的 DMP 初始化和读取函数
 int DMP_Init(void);

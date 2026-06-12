@@ -2,7 +2,7 @@
 #define __ODOM_H_
 
 #include "mpu6050/mpu_port.h"
-#include "Driver/encode.h"
+#include "encode/encode.h"
 
 typedef struct{
     float theta_init;                  // 初始朝向
@@ -23,6 +23,7 @@ extern volatile Odom odom;
 
 void odom_init(void);           // 初始化
 void odom_clear(void);
+void odom_recalibrate_targets(void); // 用当前 yaw 重新计算斜线段目标角
 void odom_update(void);
 float odom_wrap180(float angle);
 

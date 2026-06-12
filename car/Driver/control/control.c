@@ -1,8 +1,8 @@
 #include "control.h"
 
-#include "encode.h"
-#include "motor.h"
-#include "pid.h"
+#include "encode/encode.h"
+#include "motor/motor.h"
+#include "pid/pid.h"
 #include "ti_msp_dl_config.h"
 
 #include <stddef.h>

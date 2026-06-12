@@ -39,16 +39,16 @@
 | 启动与总初始化 | `main.c` | 调用 `SYSCFG_DL_init()`，初始化电机、按键、编码器、UART、OLED 和控制模块，启动 PWM、PID 定时器和 FreeRTOS。 |
 | FreeRTOS 应用入口 | `app_main.c/.h` | 创建 `Line_Follow`、`OLED`、`KEY` 三个任务，提供静态内存分配钩子和栈溢出钩子。 |
 | 任务层 | `2task.c/.h` | 实现循迹控制任务、OLED 遥测任务和按键任务。 |
-| 电机驱动 | `Driver/motor.c/.h` | 封装 TB6612 方向脚和 PWM 输出，支持左右轮正反转、停车、PWM 限幅和方向系数校准。 |
-| 编码器 | `Driver/encode.c/.h` | 使用左右轮 AB 相 GPIO 边沿中断解码增量，按 10 ms 采样周期换算 RPM。 |
-| PID 控制 | `Driver/pid.c/.h` | 支持速度式/位置式 PID，包含输出限幅、积分限幅、最小起转 PWM 和串口调参解析函数。 |
-| 控制闭环 | `Driver/control.c/.h` | 初始化左右轮速度 PID，在 TIMA1 中断中读取编码器、计算 PID、输出电机 PWM，并维护遥测快照。 |
-| UART | `Driver/uart.c/.h` | UART0 接收中断、软件接收缓存、错误中断恢复、阻塞字符串发送。 |
-| 循迹解析 | `Driver/track.c/.h` | 从 UART 缓存查找循迹帧，解析 8 路 raw 数据，计算左负右正的循迹偏差。 |
-| 按键 | `Driver/button.c/.h` | 创建按键信号量，读取低电平按下状态，按键中断后在任务中消抖并切换模式变量。 |
+| 电机驱动 | `Driver/motor/motor.c/.h` | 封装 TB6612 方向脚和 PWM 输出，支持左右轮正反转、停车、PWM 限幅和方向系数校准。 |
+| 编码器 | `Driver/encode/encode.c/.h` | 使用左右轮 AB 相 GPIO 边沿中断解码增量，按 10 ms 采样周期换算 RPM。 |
+| PID 控制 | `Driver/pid/pid.c/.h`、`Driver/pid/pid_uart.c` | 支持速度式/位置式 PID，包含输出限幅、积分限幅、最小起转 PWM 和串口调参解析函数。 |
+| 控制闭环 | `Driver/control/control.c/.h` | 初始化左右轮速度 PID，在 TIMA1 中断中读取编码器、计算 PID、输出电机 PWM，并维护遥测快照。 |
+| UART | `Driver/uart/uart.c/.h` | UART0 接收中断、软件接收缓存、错误中断恢复、阻塞字符串发送。 |
+| 循迹解析 | `Driver/track/track.c/.h` | 从 UART 缓存查找循迹帧，解析 8 路 raw 数据，计算左负右正的循迹偏差。 |
+| 按键 | `Driver/button/button.c/.h` | 创建按键信号量，读取低电平按下状态，按键中断后在任务中消抖并切换模式变量。 |
 | OLED 显示 | `oled/oled.c/.h`、`oled/oledfont.h` | 使用 PB9/PB8 软件模拟 I2C，驱动 SSD1306 OLED 显示遥测信息。 |
 | MPU6050/DMP | `mpu6050/*` | 已移植 MPU6050 I2C 读写、DMP 初始化和姿态读取接口；当前主流程尚未调用。 |
-| 阻塞延时 | `Driver/delay.c/.h` | 基于 `DL_Common_delayCycles()` 实现毫秒级阻塞延时，主要用于 OLED 初始化。 |
+| 阻塞延时 | `Driver/delay/delay.c/.h` | 基于 `DL_Common_delayCycles()` 实现毫秒级阻塞延时，主要用于 OLED 初始化。 |
 | SysConfig 外设配置 | `car.syscfg`、`Debug/ti_msp_dl_config.*` | 配置 GPIO、PWM、Timer、I2C、UART、时钟和中断。`Debug/ti_msp_dl_config.*` 为生成文件，只读不手改。 |
 
 ## 4. 集成功能说明
@@ -218,14 +218,24 @@ aa/
 │  ├─ car.syscfg                            # SysConfig 外设、引脚、时钟、中断配置源文件
 │  ├─ mspm0g3507.cmd                        # 链接脚本
 │  ├─ Driver/
-│  │  ├─ motor.c / motor.h                  # TB6612 电机与 PWM 输出
-│  │  ├─ encode.c / encode.h                # 编码器中断解码与 RPM 换算
-│  │  ├─ pid.c / pid.h                      # PID 控制与串口参数解析
-│  │  ├─ control.c / control.h              # 10 ms 速度闭环与遥测快照
-│  │  ├─ uart.c / uart.h                    # UART0 接收缓存与发送
-│  │  ├─ track.c / track.h                  # 循迹帧解析和偏差计算
-│  │  ├─ button.c / button.h                # 按键中断、信号量、模式变量
-│  │  └─ delay.c / delay.h                  # 阻塞延时
+│  │  ├─ motor/
+│  │  │  └─ motor.c / motor.h               # TB6612 电机与 PWM 输出
+│  │  ├─ encode/
+│  │  │  └─ encode.c / encode.h             # 编码器中断解码与 RPM 换算
+│  │  ├─ pid/
+│  │  │  ├─ pid.c / pid.h                   # PID 控制算法
+│  │  │  ├─ pid_uart.c                      # PID 串口调参解析
+│  │  │  └─ pid_internal.h                  # PID 模块内部共享声明
+│  │  ├─ control/
+│  │  │  └─ control.c / control.h           # 10 ms 速度闭环与遥测快照
+│  │  ├─ uart/
+│  │  │  └─ uart.c / uart.h                 # UART0 接收缓存与发送
+│  │  ├─ track/
+│  │  │  └─ track.c / track.h               # 循迹帧解析和偏差计算
+│  │  ├─ button/
+│  │  │  └─ button.c / button.h             # 按键中断、信号量、模式变量
+│  │  └─ delay/
+│  │     └─ delay.c / delay.h               # 阻塞延时
 │  ├─ oled/
 │  │  ├─ oled.c / oled.h                    # SSD1306 OLED 软件 I2C 驱动
 │  │  ├─ oledfont.h                         # 字库

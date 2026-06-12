@@ -21,6 +21,7 @@
 #include <math.h>
 #include "inv_mpu.h"
 #include "inv_mpu_dmp_motion_driver.h"
+#include "mpu_port.h"
 #include "dmpKey.h"
 #include "dmpmap.h"
 // #include "usart.h"
@@ -40,10 +41,10 @@
 #if defined MOTION_DRIVER_TARGET_MSP430
 //#include "msp430.h"
 //#include "msp430_clock.h"
-#define delay_ms    delay_ms
+#define delay_ms    MPU_delay_ms
 #define get_ms      mget_ms
-#define log_i 		printf
-#define log_e  		printf
+#define log_i(...) ((void) 0)
+#define log_e(...) ((void) 0)
 
 #elif defined EMPL_TARGET_MSP430
 #include "msp430.h"
@@ -58,7 +59,7 @@
 /* Instead of using the standard TWI driver from the ASF library, we're using
  * a TWI driver that follows the slave address + register address convention.
  */
-#include "delay.h"
+#include "delay/delay.h"
 #include "sysclk.h"
 #include "log.h"
 #include "uc3l0_clock.h"
@@ -1380,4 +1381,3 @@ int dmp_register_android_orient_cb(void (*func)(unsigned char))
 /**
  *  @}
  */
-

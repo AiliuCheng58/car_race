@@ -25,7 +25,7 @@
 #include "inv_mpu.h"
 #include "inv_mpu_dmp_motion_driver.h"
 #include "mpu_port.h"
-#include "delay.h"
+#include "delay/delay.h"
 
 #define MPU6050							//��������ʹ�õĴ�����ΪMPU6050
 #define MOTION_DRIVER_TARGET_MSP430		//������������,����MSP430������(��ֲ��STM32F1)
@@ -50,15 +50,15 @@
 
 #define i2c_write   MPU_Write_Len
 #define i2c_read    MPU_Read_Len
-#define delay_ms    delay_ms
+#define delay_ms    MPU_delay_ms
 #define get_ms      mget_ms
 //static inline int reg_int_cb(struct int_param_s *int_param)
 //{
 //    return msp430_reg_int_cb(int_param->cb, int_param->pin, int_param->lp_exit,
 //        int_param->active_low);
 //}
-#define log_i 	printf	//��ӡ��Ϣ
-#define log_e  	printf	//��ӡ��Ϣ
+#define log_i(...) ((void) 0)
+#define log_e(...) ((void) 0)
 /* labs is already defined by TI's toolchain. */
 /* fabs is for doubles. fabsf is for floats. */
 #define fabs        fabsf
@@ -89,7 +89,7 @@ static inline int reg_int_cb(struct int_param_s *int_param)
  * a TWI driver that follows the slave address + register address convention.
  */
 #include "twi.h"
-#include "delay.h"
+#include "delay/delay.h"
 #include "sysclk.h"
 #include "log.h"
 #include "sensors_xplained.h"
@@ -2849,9 +2849,6 @@ lp_int_restore:
     st.chip_cfg.int_motion_only = 0;
     return 0;
 }
-
-
-
 
 
 

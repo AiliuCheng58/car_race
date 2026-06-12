@@ -1,15 +1,17 @@
 /* TI includes */
-#include "button.h"
+#include "button/button.h"
+#include "mpu6050/mpu_port.h"
+#include "ti/driverlib/dl_gpio.h"
 #include "ti_msp_dl_config.h"
 #include "ti/driverlib/dl_timer.h"
 
 #include "app_main.h"
-#include "control.h"
-#include "delay.h"
-#include "encode.h"
-#include "motor.h"
+#include "control/control.h"
+#include "delay/delay.h"
+#include "encode/encode.h"
+#include "motor/motor.h"
 #include "oled.h"
-#include "uart.h"
+#include "uart/uart.h"
 #include "odom/odom.h"
 
 int main(void)
@@ -18,9 +20,8 @@ int main(void)
 
     motor_init();                                   // 初始化 TB6612 方向脚、STBY 使能脚和 PWM 输出值
     Button_init();                                  // 按键初始化，先创建信号量再打开 GPIOB 中断
-    encoder_init();                                 // 初始化编码器 AB 相初始状态，并打开 GPIO 中断
     UART_init();                                    // 打开 UART 接收中断，后面用于循迹数据和 PID 串口调参
-    /*OLED_Init();                                    // 初始化板载显示接口上的 4 针 I2C OLED
+    /*OLED_Init();                                  // 初始化板载显示接口上的 4 针 I2C OLED
     OLED_WR_Byte(0xA5, OLED_CMD);                   // 全屏点亮 1 秒，用来确认 OLED 通信和供电是否正常
     delay_ms(1000U);
     OLED_WR_Byte(0xA4, OLED_CMD);
@@ -28,6 +29,8 @@ int main(void)
     OLED_ShowString(0, 0, (uint8_t *) "OLED BOOT", 8);
     OLED_ShowString(0, 1, (uint8_t *) "SCL PB9 SDA PB8", 8);
 */
+    DMP_Init();                                     // MPU 初始化失败时闪灯等待，成功后继续启动任务
+    encoder_init();                                 // 初始化编码器 AB 相初始状态，并打开 GPIO 中断
     odom_init();                                    // 初始化里程计
     control_init();                                 // 初始化左右轮速度环，默认目标速度为 0
 
