@@ -1,4 +1,5 @@
 #include "oled.h"
+#include "stdio.h"
 #include "delay/delay.h"
 #include "oledfont.h"  	 
 #include "ti/driverlib/m0p/dl_core.h"
@@ -12,6 +13,9 @@
 //[5]0 1 2 3 ... 127	
 //[6]0 1 2 3 ... 127	
 //[7]0 1 2 3 ... 127 			   
+
+
+
 //反显函数
 void OLED_ColorTurn(uint8_t i)
 {
@@ -97,21 +101,15 @@ void Send_Byte(uint8_t dat)
 //mode:数据/命令标志 0,表示命令;1,表示数据;
 void OLED_WR_Byte(uint8_t dat,uint8_t mode)
 {
-    uint8_t addr_index;
-
-    for (addr_index = 0; addr_index < 2U; addr_index++) {
-        uint8_t address = (addr_index == 0U) ? 0x78U : 0x7AU;
-
-        I2C_Start();
-        Send_Byte(address);
-        I2C_WaitAck();
-        if(mode){Send_Byte(0x40);}
-        else{Send_Byte(0x00);}
-        I2C_WaitAck();
-        Send_Byte(dat);
-        I2C_WaitAck();
-        I2C_Stop();
-    }
+    I2C_Start();
+    Send_Byte(0x78);
+    I2C_WaitAck();
+    if(mode){Send_Byte(0x40);}
+    else{Send_Byte(0x00);}
+    I2C_WaitAck();
+    Send_Byte(dat);
+    I2C_WaitAck();
+    I2C_Stop();
 }
 
 
@@ -283,3 +281,20 @@ void OLED_Init(void)
     OLED_Clear();
     OLED_WR_Byte(0xAF,OLED_CMD); /*display ON*/ 
 }  
+
+void OLED_Show_RPY(float pitch, float roll, float yaw)
+{
+    uint8_t buf[30];
+    
+    // 显示 Pitch
+    sprintf((char*)buf, "Pitch:%.2f", pitch);
+    OLED_ShowString(0, 2, buf, 16);  // 第0行，16号字体
+    
+    // 显示 Roll
+    sprintf((char*)buf, "Roll :%.2f", roll);
+    OLED_ShowString(0, 4, buf, 16);  // 第2行
+    
+    // 显示 Yaw
+    sprintf((char*)buf, "Yaw  :%.2f", yaw);
+    OLED_ShowString(0, 6, buf, 16);  // 第4行
+}
