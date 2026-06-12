@@ -5,9 +5,13 @@
 
 void delay_ms(uint32_t ms)
 {
-    while (ms > 0U) { // 还剩延时时间就继续分段等待
-        uint32_t step_ms = (ms > 100U) ? 100U : ms; // 单次最多延时 100ms，避免 cycles 计算过大
-        DL_Common_delayCycles((CPUCLK_FREQ / 1000U) * step_ms); // 按 CPU 主频换算成延时周期数
-        ms -= step_ms; // 扣掉本次已经延时的毫秒数
+    delay_us(ms * 1000);
+}
+
+void delay_us(uint32_t us){
+    while (us > 0U) {
+        uint32_t step_us = (us > 100U) ? 100U : us;
+        DL_Common_delayCycles((CPUCLK_FREQ / 1000000U) * step_us);
+        us -= step_us; // 扣掉本次已经延时的毫秒数
     }
 }
